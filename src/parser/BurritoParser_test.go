@@ -5,30 +5,51 @@ import (
 	"testing"
 )
 
-// func TestParsedRoutes_AddRules(t *testing.T) {
-// 	type fields struct {
-// 		routes map[Arg][]Resp
-// 	}
-// 	type args struct {
-// 		ar     Arg
-// 		bodies []Resp
-// 	}
-// 	tests := []struct {
-// 		name   string
-// 		fields fields
-// 		args   args
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			rts := &ParsedRoutes{
-// 				routes: tt.fields.routes,
-// 			}
-// 			rts.AddRules(tt.args.ar, tt.args.bodies)
-// 		})
-// 	}
-// }
+func TestParsedRoutes_AddRules(t *testing.T) {
+	type fields struct {
+		routes map[Arg][]Resp
+	}
+	type args struct {
+		ar     Arg
+		bodies []Resp
+	}
+	tests := []struct {
+		name      string
+		fields    fields
+		args      args
+		afterCall ParsedRoutes
+	}{
+		{
+			name: "Add route to empty set of fields",
+			fields: fields{
+				routes: map[Arg][]Resp{},
+			},
+			args: args{
+				ar: Arg{
+					reqType: "GET",
+					path:    "/",
+				},
+				bodies: []Resp{Resp{}},
+			},
+			afterCall: ParsedRoutes{
+				routes: map[Arg][]Resp{
+					Arg{path: "/", reqType: "GET"}: []Resp{Resp{}},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rts := &ParsedRoutes{
+				routes: tt.fields.routes,
+			}
+			rts.AddRules(tt.args.ar, tt.args.bodies)
+			if !reflect.DeepEqual(rts, &tt.afterCall) {
+				t.Errorf("AddRules = %v, want %v", rts, &tt.afterCall)
+			}
+		})
+	}
+}
 
 func TestParseBurritoFile(t *testing.T) {
 	type args struct {

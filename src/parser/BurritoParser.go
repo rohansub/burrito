@@ -12,10 +12,12 @@ type Resp struct {
 	respType string // file/json/string
 }
 
+// ParsedRoutes contains a map of Arg structs to the Resp object associated with it
 type ParsedRoutes struct {
 	routes map[Arg][]Resp
 }
 
+// AddRules - Add a rule to an existing ParsedRoutes Object
 func (rts *ParsedRoutes) AddRules(ar Arg, bodies []Resp) {
 	_, ok := rts.routes[ar]
 	if ok {
@@ -25,6 +27,7 @@ func (rts *ParsedRoutes) AddRules(ar Arg, bodies []Resp) {
 	rts.routes[ar] = bodies
 }
 
+// ParseBurritoFile - parse a burrito file into a ParsedRoutes object
 func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 	content, err := ioutil.ReadFile(filepath)
 	if err != nil {

@@ -16,11 +16,16 @@ const (
 	TYPERE string = `\s*'((GET)|(POST)|(PUT)|(DELETE))'\s*`
 )
 
+// Arg - a path and url representing an argument
 type Arg struct {
 	reqType string
 	path    string
 }
 
+/**
+*
+* Parse an Arg object given an argStr, return error when there is a syntax error
+ */
 func createArg(argStr string) (Arg, error) {
 	// Check to see if both path and request are given
 	expTwoParams := re.MustCompile(`\(` + PATHRE + `,` + TYPERE + `\)`)
