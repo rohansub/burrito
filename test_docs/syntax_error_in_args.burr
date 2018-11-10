@@ -1,0 +1,2 @@
+('/d', 'GET') => 'hello';
+('/d', 'GET', 'wrong') => 'hello';

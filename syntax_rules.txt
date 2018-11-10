@@ -1,0 +1,15 @@
+All requests are of the following form, the left side of the arrow is the request 
+parameter, and the right is the response: 
+
+The parameters are in the following order: path, then Request Type.
+If request is not specified, GET is the default. If url isn't specified, '/'
+is the default.
+
+
+example:
+('/', 'GET') => 'index.html';
+
+
+Any data that is sent with the request in json can be accessed in the response
+with the value 'data.json'
+
