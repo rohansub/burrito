@@ -2,7 +2,7 @@ package parser
 
 import (
 	"errors"
-	. "fmt"
+	"fmt"
 	re "regexp"
 )
 
@@ -55,6 +55,6 @@ func createArg(argStr string) (Arg, error) {
 	}
 
 	// Return Error if compilation failed
-	m := Sprintf("Failed! Argument - %s - had an error", argStr)
+	m := fmt.Sprintf("Failed! Argument - %s - had an error", argStr)
 	return Arg{}, errors.New(m)
 }

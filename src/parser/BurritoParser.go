@@ -8,10 +8,6 @@ import (
 	str "strings"
 )
 
-type Resp struct {
-	respType string // file/json/string
-}
-
 // ParsedRoutes contains a map of Arg structs to the Resp object associated with it
 type ParsedRoutes struct {
 	routes map[Arg][]Resp
