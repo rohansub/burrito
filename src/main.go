@@ -12,5 +12,6 @@ func main() {
 		fmt.Println("Usage: ./main <burrito_file>")
 		return
 	}
-	parser.ParseBurritoFile(os.Args[1])
+	fmt.Println(parser.ParseBurritoFile(os.Args[1]))
+
 }

@@ -19,7 +19,7 @@ func Test_createResp(t *testing.T) {
 		{
 			name: "File data test",
 			args: args{
-				respStr: "\"hello.html\"",
+				respStr: "'hello.html'",
 			},
 			want: Resp{
 				respType: "FILE",
@@ -38,7 +38,7 @@ func Test_createResp(t *testing.T) {
 		{
 			name: "String data",
 			args: args{
-				respStr: "s\"Hello World\"",
+				respStr: "s'Hello World'",
 			},
 			want: Resp{
 				respType: "STR",

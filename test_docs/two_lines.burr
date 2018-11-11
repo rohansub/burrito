@@ -1,2 +1,2 @@
-() => "hello";
-('/hello', 'GET') => "hello";
+() => 'hello';
+('/hello', 'GET') => 'hello';

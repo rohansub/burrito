@@ -1,5 +1,5 @@
-() => "hello";
+() => 'hello';
 
 # comment
-('/hello', 'GET') => "hello";
-('/hello', 'PUT') => "hello";
+('/hello', 'GET') => 'hello';
+('/hello', 'PUT') => 'hello';

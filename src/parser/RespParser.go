@@ -12,7 +12,7 @@ type Resp struct {
 
 func createResp(respStr string) (Resp, error) {
 
-	isString := re.MustCompile(`s"(.*)"`)
+	isString := re.MustCompile(`s'(.*)'`)
 	if isString.MatchString(respStr) {
 		matches := isString.FindStringSubmatch(respStr)
 		return Resp{
@@ -21,7 +21,7 @@ func createResp(respStr string) (Resp, error) {
 		}, nil
 	}
 
-	isFile := re.MustCompile(`"(.*)"`)
+	isFile := re.MustCompile(`'(.*)'`)
 	if isFile.MatchString(respStr) {
 		matches := isFile.FindStringSubmatch(respStr)
 		return Resp{

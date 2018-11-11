@@ -76,6 +76,5 @@ func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 		}
 		pbData.AddRules(arg, resp)
 	}
-	log.Println(pbData)
 	return pbData, nil
 }
