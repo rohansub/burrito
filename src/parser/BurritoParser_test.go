@@ -68,7 +68,12 @@ func TestParseBurritoFile(t *testing.T) {
 			},
 			want: ParsedRoutes{
 				routes: map[Arg][]Resp{
-					Arg{reqType: "GET", path: "/"}: []Resp{Resp{}},
+					Arg{reqType: "GET", path: "/"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
 				},
 			},
 		},
@@ -79,8 +84,18 @@ func TestParseBurritoFile(t *testing.T) {
 			},
 			want: ParsedRoutes{
 				routes: map[Arg][]Resp{
-					Arg{reqType: "GET", path: "/"}:      []Resp{Resp{}},
-					Arg{reqType: "GET", path: "/hello"}: []Resp{Resp{}},
+					Arg{reqType: "GET", path: "/"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
+					Arg{reqType: "GET", path: "/hello"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
 				},
 			},
 		},
@@ -91,9 +106,24 @@ func TestParseBurritoFile(t *testing.T) {
 			},
 			want: ParsedRoutes{
 				routes: map[Arg][]Resp{
-					Arg{reqType: "GET", path: "/"}:      []Resp{Resp{}},
-					Arg{reqType: "GET", path: "/hello"}: []Resp{Resp{}},
-					Arg{reqType: "PUT", path: "/hello"}: []Resp{Resp{}},
+					Arg{reqType: "GET", path: "/"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
+					Arg{reqType: "GET", path: "/hello"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
+					Arg{reqType: "PUT", path: "/hello"}: []Resp{
+						Resp{
+							respType: "FILE",
+							body:     "hello",
+						},
+					},
 				},
 			},
 		},
