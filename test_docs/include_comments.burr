@@ -1,5 +1,0 @@
-() => 'hello';
-
-# comment
-('/hello', 'GET') => 'hello';
-('/hello', 'PUT') => 'hello';
