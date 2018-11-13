@@ -16,10 +16,10 @@ func main() {
 	if err != nil {
 		fmt.Println("Your Burrito has failed to compile")
 		fmt.Println("ERROR", err)
+		return
 	}
 
-	serv := burrito.BurritoServer{
-		Routes: &routes,
-	}
+	serv := burrito.NewBurritoServer(&routes)
+
 	serv.Run()
 }

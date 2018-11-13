@@ -12,7 +12,17 @@ type BurritoServer struct {
 	Routes *ParsedRoutes
 }
 
-func (bs *BurritoServer) Render(res Resp, w http.ResponseWriter, r *http.Request) bool {
+func NewBurritoServer(rts *ParsedRoutes) *BurritoServer {
+	server := &BurritoServer{
+		Routes: rts,
+	}
+	for k, methodMap := range server.Routes.routes {
+		server.addHandler(k, methodMap)
+	}
+	return server
+}
+
+func (bs *BurritoServer) render(res Resp, w http.ResponseWriter, r *http.Request) bool {
 	if res.respType == "FILE" {
 		w.Header().Set("Content-type", "text/html")
 		f, err := ioutil.ReadFile(string(res.body))
@@ -34,25 +44,25 @@ func (bs *BurritoServer) Render(res Resp, w http.ResponseWriter, r *http.Request
 	return false
 }
 
-// RenderChain - render the list of Resp objects, until a data response is sent
-func (bs *BurritoServer) RenderChain(responses []Resp, w http.ResponseWriter, r *http.Request) {
+// renderChain - render the list of Resp objects, until a data response is sent
+func (bs *BurritoServer) renderChain(responses []Resp, w http.ResponseWriter, r *http.Request) {
 	for i, res := range responses {
-		isRedirect := bs.Render(res, w, r)
+		isRedirect := bs.render(res, w, r)
 		if !isRedirect {
 			if i != len(responses)-1 {
-				log.Println("WARN: Response sent before all actions completed")
+				log.Println("WARN: Response sent before all actions completed!")
 			}
 			break
 		}
 	}
 }
 
-// AddHandler - for given path and method map
-func (bs *BurritoServer) AddHandler(path string, methodMap map[string][]Resp) {
+// addHandler - for given path and method map
+func (bs *BurritoServer) addHandler(path string, methodMap map[string][]Resp) {
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		for k, v := range methodMap {
 			if r.Method == k {
-				bs.RenderChain(v, w, r)
+				bs.renderChain(v, w, r)
 			}
 		}
 	})
@@ -60,9 +70,5 @@ func (bs *BurritoServer) AddHandler(path string, methodMap map[string][]Resp) {
 
 // Run - run the burrito server
 func (bs *BurritoServer) Run() {
-	for k, methodMap := range bs.Routes.routes {
-		bs.AddHandler(k, methodMap)
-	}
-
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

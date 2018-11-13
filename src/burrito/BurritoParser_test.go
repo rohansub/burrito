@@ -18,6 +18,7 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 		fields    fields
 		args      args
 		afterCall ParsedRoutes
+		wantErr   bool
 	}{
 		{
 			name: "Add route to empty set of fields",
@@ -39,13 +40,42 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Add Rule Twice",
+			fields: fields{
+				routes: map[string]map[string][]Resp{
+					"/": {
+						"GET": []Resp{Resp{}},
+					},
+				},
+			},
+			args: args{
+				ar: Arg{
+					reqType: "GET",
+					path:    "/",
+				},
+				bodies: []Resp{Resp{}},
+			},
+			afterCall: ParsedRoutes{
+				routes: map[string]map[string][]Resp{
+					"/": {
+						"GET": []Resp{Resp{}},
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rts := &ParsedRoutes{
 				routes: tt.fields.routes,
 			}
-			rts.AddRules(tt.args.ar, tt.args.bodies)
+			err := rts.AddRules(tt.args.ar, tt.args.bodies)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseBurritoFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 			if !reflect.DeepEqual(rts, &tt.afterCall) {
 				t.Errorf("AddRules = %v, want %v", rts, &tt.afterCall)
 			}
