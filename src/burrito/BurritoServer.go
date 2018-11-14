@@ -12,6 +12,7 @@ type BurritoServer struct {
 	Routes *ParsedRoutes
 }
 
+// NewBurritoServer  create burrito server, and initialize route handlers
 func NewBurritoServer(rts *ParsedRoutes) *BurritoServer {
 	server := &BurritoServer{
 		Routes: rts,

@@ -7,11 +7,13 @@ import (
 )
 
 const (
+	// Protocol constants
 	GET    string = "GET"
 	PUT    string = "PUT"
 	POST   string = "POST"
 	DELETE string = "DELETE"
 
+	// REGEX constants
 	PATHRE string = `\s*'(/[/.a-zA-Z0-9-]*)'\s*`
 	TYPERE string = `\s*'((GET)|(POST)|(PUT)|(DELETE))'\s*`
 )

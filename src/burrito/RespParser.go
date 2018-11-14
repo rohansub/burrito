@@ -5,11 +5,14 @@ import (
 	re "regexp"
 )
 
+// Resp struct representing Response - contains a body and a respType
 type Resp struct {
-	respType string // file/json/string
+	respType string // FILE or JSON or STR
 	body     string
 }
 
+// createResp - parse a Resp struct from the string input,
+//              return error if string can't be parsed
 func createResp(respStr string) (Resp, error) {
 	isString := re.MustCompile(`s'(.*)'`)
 	if isString.MatchString(respStr) {
