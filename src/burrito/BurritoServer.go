@@ -17,6 +17,7 @@ func NewBurritoServer(rts *ParsedRoutes) *BurritoServer {
 	server := &BurritoServer{
 		Routes: rts,
 	}
+	fmt.Println(rts)
 	for k, methodMap := range server.Routes.routes {
 		server.addHandler(k, methodMap)
 	}

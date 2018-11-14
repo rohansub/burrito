@@ -14,7 +14,7 @@ const (
 	DELETE string = "DELETE"
 
 	// REGEX constants
-	PATHRE string = `\s*'(/[/.a-zA-Z0-9-]*)'\s*`
+	PATHRE string = `\s*'((/([.a-zA-Z0-9-]*)|(<(int|str):[a-z]*>))+)'\s*`
 	TYPERE string = `\s*'((GET)|(POST)|(PUT)|(DELETE))'\s*`
 )
 
@@ -34,8 +34,8 @@ func createArg(argStr string) (Arg, error) {
 	if expTwoParams.MatchString(argStr) {
 		matches := expTwoParams.FindStringSubmatch(argStr)
 		return Arg{
-			path:    matches[1],
-			reqType: matches[2],
+			path:    matches[1], // first match is the path
+			reqType: matches[6], // sixth match ist the method type
 		}, nil
 	}
 	// Check to see if only path is specified
