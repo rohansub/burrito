@@ -1,4 +1,4 @@
-package burrito
+package parser
 
 import (
 	"errors"
@@ -9,28 +9,28 @@ import (
 
 // ParsedRoutes contains a map of Arg structs to the Resp object associated with it
 type ParsedRoutes struct {
-	routes map[string]map[string][]Resp
+	Routes map[string]map[string][]Resp
 }
 
 // AddRules - Add a rule to an existing ParsedRoutes Object
 func (rts *ParsedRoutes) AddRules(ar Arg, bodies []Resp) error {
-	_, pathExists := rts.routes[ar.path]
+	_, pathExists := rts.Routes[ar.path]
 	if !pathExists {
-		rts.routes[ar.path] = make(map[string][]Resp)
+		rts.Routes[ar.path] = make(map[string][]Resp)
 	}
-	_, methodExists := rts.routes[ar.path][ar.reqType]
+	_, methodExists := rts.Routes[ar.path][ar.reqType]
 	if methodExists {
 
 		m := fmt.Sprintf("Multiple Arguments with path %s and route %s were found",
 			ar.path, ar.reqType)
 		return errors.New(m)
 	}
-	rts.routes[ar.path][ar.reqType] = bodies
+	rts.Routes[ar.path][ar.reqType] = bodies
 	return nil
 
 }
 
-// ParseBurritoFile - parse a burrito file into a ParsedRoutes object
+// ParseBurritoFile - parse a server file into a ParsedRoutes object
 func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 	content, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -40,7 +40,7 @@ func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 	routes := str.Split(source, ";")
 
 	pbData := ParsedRoutes{
-		routes: make(map[string]map[string][]Resp),
+		Routes: make(map[string]map[string][]Resp),
 	}
 
 	for _, r := range routes {

@@ -4,22 +4,23 @@ import (
 	"fmt"
 	"os"
 
-	"./burrito"
-)
+	"github.com/rcsubra2/burrito/src/server"
+	"github.com/rcsubra2/burrito/src/parser"
+	)
 
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: ./main <burrito_file>")
 		return
 	}
-	routes, err := burrito.ParseBurritoFile(os.Args[1])
+	routes, err := parser.ParseBurritoFile(os.Args[1])
 	if err != nil {
 		fmt.Println("Your Burrito has failed to compile")
 		fmt.Println("ERROR", err)
 		return
 	}
 
-	serv := burrito.NewBurritoServer(&routes)
+	serv := server.NewBurritoServer(&routes)
 
 	serv.Run()
 }

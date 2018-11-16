@@ -1,4 +1,4 @@
-package burrito
+package parser
 
 import (
 	"reflect"
@@ -35,10 +35,10 @@ func Test_createArg(t *testing.T) {
 		{
 			name: "Correct path, with GET explicitly written",
 			args: args{
-				argStr: "('/zesty/burrito', 'GET')",
+				argStr: "('/zesty/server', 'GET')",
 			},
 			want: Arg{
-				path:    "/zesty/burrito",
+				path:    "/zesty/server",
 				reqType: "GET",
 			},
 			wantErr: false,
@@ -46,10 +46,10 @@ func Test_createArg(t *testing.T) {
 		{
 			name: "Correct path, with PUT explicitly written",
 			args: args{
-				argStr: "('/zesty/burrito', 'PUT')",
+				argStr: "('/zesty/server', 'PUT')",
 			},
 			want: Arg{
-				path:    "/zesty/burrito",
+				path:    "/zesty/server",
 				reqType: "PUT",
 			},
 			wantErr: false,
@@ -57,10 +57,10 @@ func Test_createArg(t *testing.T) {
 		{
 			name: "Correct path, with POST explicitly written",
 			args: args{
-				argStr: "('/zesty/burrito', 'POST')",
+				argStr: "('/zesty/server', 'POST')",
 			},
 			want: Arg{
-				path:    "/zesty/burrito",
+				path:    "/zesty/server",
 				reqType: "POST",
 			},
 			wantErr: false,
@@ -68,10 +68,10 @@ func Test_createArg(t *testing.T) {
 		{
 			name: "Correct path, with DELETE explicitly written",
 			args: args{
-				argStr: "('/zesty/burrito', 'DELETE')",
+				argStr: "('/zesty/server', 'DELETE')",
 			},
 			want: Arg{
-				path:    "/zesty/burrito",
+				path:    "/zesty/server",
 				reqType: "DELETE",
 			},
 			wantErr: false,
@@ -79,7 +79,7 @@ func Test_createArg(t *testing.T) {
 		{
 			name: "Correct path, invalid request",
 			args: args{
-				argStr: "('/zesty/burrito', 'XXX')",
+				argStr: "('/zesty/server', 'XXX')",
 			},
 			want:    Arg{},
 			wantErr: true,

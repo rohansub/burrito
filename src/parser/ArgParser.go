@@ -1,4 +1,4 @@
-package burrito
+package parser
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ const (
 	DELETE string = "DELETE"
 
 	// REGEX constants
-	PATHRE string = `\s*'((/([.a-zA-Z0-9-]*)|(<(int|str):[a-z]*>))+)'\s*`
+	PATHRE string = `\s*'((/([.a-zA-Z0-9-]*)|(<(int|str):[a-zA-Z]*>))+)'\s*`
 	TYPERE string = `\s*'((GET)|(POST)|(PUT)|(DELETE))'\s*`
 )
 

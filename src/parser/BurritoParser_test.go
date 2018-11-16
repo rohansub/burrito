@@ -1,4 +1,4 @@
-package burrito
+package parser
 
 import (
 	"reflect"
@@ -33,7 +33,7 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 				bodies: []Resp{Resp{}},
 			},
 			afterCall: ParsedRoutes{
-				routes: map[string]map[string][]Resp{
+				Routes: map[string]map[string][]Resp{
 					"/": {
 						"GET": []Resp{Resp{}},
 					},
@@ -57,7 +57,7 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 				bodies: []Resp{Resp{}},
 			},
 			afterCall: ParsedRoutes{
-				routes: map[string]map[string][]Resp{
+				Routes: map[string]map[string][]Resp{
 					"/": {
 						"GET": []Resp{Resp{}},
 					},
@@ -69,7 +69,7 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rts := &ParsedRoutes{
-				routes: tt.fields.routes,
+				Routes: tt.fields.routes,
 			}
 			err := rts.AddRules(tt.args.ar, tt.args.bodies)
 			if (err != nil) != tt.wantErr {
@@ -99,12 +99,12 @@ func TestParseBurritoFile(t *testing.T) {
 				filepath: "../../test_burr/single_line.burr",
 			},
 			want: ParsedRoutes{
-				routes: map[string]map[string][]Resp{
+				Routes: map[string]map[string][]Resp{
 					"/": {
 						"GET": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 					},
@@ -117,20 +117,20 @@ func TestParseBurritoFile(t *testing.T) {
 				filepath: "../../test_burr/two_lines.burr",
 			},
 			want: ParsedRoutes{
-				routes: map[string]map[string][]Resp{
+				Routes: map[string]map[string][]Resp{
 					"/": {
 						"GET": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 					},
 					"/hello": {
 						"GET": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 					},
@@ -143,26 +143,26 @@ func TestParseBurritoFile(t *testing.T) {
 				filepath: "../../test_burr/include_comments.burr",
 			},
 			want: ParsedRoutes{
-				routes: map[string]map[string][]Resp{
+				Routes: map[string]map[string][]Resp{
 					"/": {
 						"GET": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 					},
 					"/hello": {
 						"GET": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 						"PUT": []Resp{
 							Resp{
-								respType: "FILE",
-								body:     "hello",
+								RespType: "FILE",
+								Body:     "hello",
 							},
 						},
 					},

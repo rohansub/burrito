@@ -1,45 +1,46 @@
-package burrito
+package server
 
 import (
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/rcsubra2/burrito/src/parser"
 )
 
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
-	Routes *ParsedRoutes
+	Routes *parser.ParsedRoutes
 }
 
-// NewBurritoServer  create burrito server, and initialize route handlers
-func NewBurritoServer(rts *ParsedRoutes) *BurritoServer {
+// NewBurritoServer  create server server, and initialize route handlers
+func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
 	server := &BurritoServer{
 		Routes: rts,
 	}
-	fmt.Println(rts)
-	for k, methodMap := range server.Routes.routes {
+	for k, methodMap := range server.Routes.Routes {
 		server.addHandler(k, methodMap)
 	}
 	return server
 }
 
-func (bs *BurritoServer) render(res Resp, w http.ResponseWriter, r *http.Request) bool {
-	if res.respType == "FILE" {
+func (bs *BurritoServer) render(res parser.Resp, w http.ResponseWriter, r *http.Request) bool {
+	if res.RespType == "FILE" {
 		w.Header().Set("Content-type", "text/html")
-		f, err := ioutil.ReadFile(string(res.body))
+		f, err := ioutil.ReadFile(string(res.Body))
 		if err != nil {
 			w.WriteHeader(404)
 			w.Write([]byte("404 Something went wrong - " + http.StatusText(404)))
 		}
 		w.Write(f)
 		return false
-	} else if res.respType == "STR" {
+	} else if res.RespType == "STR" {
 		// TODO
 		w.Header().Set("Content-type", "text/html")
-		fmt.Fprintf(w, res.body)
+		fmt.Fprintf(w, res.Body)
 		return false
-	} else if res.respType == "CONT" {
+	} else if res.RespType == "CONT" {
 		// TODO
 		return true
 	}
@@ -47,7 +48,7 @@ func (bs *BurritoServer) render(res Resp, w http.ResponseWriter, r *http.Request
 }
 
 // renderChain - render the list of Resp objects, until a data response is sent
-func (bs *BurritoServer) renderChain(responses []Resp, w http.ResponseWriter, r *http.Request) {
+func (bs *BurritoServer) renderChain(responses []parser.Resp, w http.ResponseWriter, r *http.Request) {
 	for i, res := range responses {
 		isRedirect := bs.render(res, w, r)
 		if !isRedirect {
@@ -60,7 +61,7 @@ func (bs *BurritoServer) renderChain(responses []Resp, w http.ResponseWriter, r 
 }
 
 // addHandler - for given path and method map
-func (bs *BurritoServer) addHandler(path string, methodMap map[string][]Resp) {
+func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.Resp) {
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		for k, v := range methodMap {
 			if r.Method == k {

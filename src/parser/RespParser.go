@@ -1,14 +1,14 @@
-package burrito
+package parser
 
 import (
 	"errors"
 	re "regexp"
 )
 
-// Resp struct representing Response - contains a body and a respType
+// Resp struct representing Response - contains a Body and a RespType
 type Resp struct {
-	respType string // FILE or JSON or STR
-	body     string
+	RespType string // FILE or JSON or STR
+	Body     string
 }
 
 // createResp - parse a Resp struct from the string input,
@@ -18,8 +18,8 @@ func createResp(respStr string) (Resp, error) {
 	if isString.MatchString(respStr) {
 		matches := isString.FindStringSubmatch(respStr)
 		return Resp{
-			respType: "STR",
-			body:     matches[1],
+			RespType: "STR",
+			Body:     matches[1],
 		}, nil
 	}
 
@@ -27,8 +27,8 @@ func createResp(respStr string) (Resp, error) {
 	if isFile.MatchString(respStr) {
 		matches := isFile.FindStringSubmatch(respStr)
 		return Resp{
-			respType: "FILE",
-			body:     matches[1],
+			RespType: "FILE",
+			Body:     matches[1],
 		}, nil
 	}
 

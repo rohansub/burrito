@@ -1,4 +1,4 @@
-package burrito
+package parser
 
 import (
 	"reflect"
@@ -22,8 +22,8 @@ func Test_createResp(t *testing.T) {
 				respStr: "'hello.html'",
 			},
 			want: Resp{
-				respType: "FILE",
-				body:     "hello.html",
+				RespType: "FILE",
+				Body:     "hello.html",
 			},
 			wantErr: false,
 		},
@@ -41,8 +41,8 @@ func Test_createResp(t *testing.T) {
 				respStr: "s'Hello World'",
 			},
 			want: Resp{
-				respType: "STR",
-				body:     "Hello World",
+				RespType: "STR",
+				Body:     "Hello World",
 			},
 			wantErr: false,
 		},

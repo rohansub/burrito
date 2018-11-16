@@ -1,4 +1,4 @@
-package burrito
+package server
 
 import (
 	"io/ioutil"
