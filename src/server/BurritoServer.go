@@ -6,20 +6,22 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rcsubra2/burrito/src/mux"
 	"github.com/rcsubra2/burrito/src/parser"
 )
 
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
-	Routes *parser.ParsedRoutes
+	router *mux.Router
 }
 
 // NewBurritoServer  create server server, and initialize route handlers
 func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
+	r := mux.NewRouter()
 	server := &BurritoServer{
-		Routes: rts,
+		router: r,
 	}
-	for k, methodMap := range server.Routes.Routes {
+	for k, methodMap := range rts.Routes {
 		server.addHandler(k, methodMap)
 	}
 	return server
@@ -62,7 +64,7 @@ func (bs *BurritoServer) renderChain(responses []parser.Resp, w http.ResponseWri
 
 // addHandler - for given path and method map
 func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.Resp) {
-	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	bs.router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		for k, v := range methodMap {
 			if r.Method == k {
 				bs.renderChain(v, w, r)
@@ -73,5 +75,5 @@ func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.R
 
 // Run - run the burrito server
 func (bs *BurritoServer) Run() {
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", bs.router))
 }

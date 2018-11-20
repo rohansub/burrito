@@ -9,7 +9,7 @@ import (
 
 // ParsedRoutes contains a map of Arg structs to the Resp object associated with it
 type ParsedRoutes struct {
-	Routes map[string]map[string][]Resp
+	Routes map[string]map[string][]Resp // Key - URL, Value - Map (Key - Method type, Value - Response)
 }
 
 // AddRules - Add a rule to an existing ParsedRoutes Object

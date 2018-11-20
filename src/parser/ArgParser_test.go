@@ -106,6 +106,58 @@ func Test_createArg(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Path with parameter in path",
+			args: args{
+				argStr: "('/zesty/:server', 'GET')",
+			},
+			want: Arg{
+				path:    "/zesty/:server",
+				reqType: "GET",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Path with parameter in path, int type specified",
+			args: args{
+				argStr: "('/zesty/:server:int', 'GET')",
+			},
+			want: Arg{
+				path:    "/zesty/:server:int",
+				reqType: "GET",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Path with parameter in path, float type specified",
+			args: args{
+				argStr: "('/zesty/:server:flt', 'GET')",
+			},
+			want: Arg{
+				path:    "/zesty/:server:flt",
+				reqType: "GET",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Path with parameter in path, string type specified",
+			args: args{
+				argStr: "('/zesty/:server:str', 'GET')",
+			},
+			want: Arg{
+				path:    "/zesty/:server:str",
+				reqType: "GET",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Path with parameter in path, bad type specified",
+			args: args{
+				argStr: "('/zesty/:server:bogus', 'GET')",
+			},
+			want: Arg{},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
