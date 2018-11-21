@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"github.com/rcsubra2/burrito/src/environment"
 	"reflect"
 	"testing"
 )
@@ -82,7 +83,7 @@ func TestPathSegment_SegMatchAndExtractVars(t *testing.T) {
 		fields fields
 		args   args
 		want   bool
-		want1  *EnvEntry
+		want1  *environment.EnvEntry
 	}{
 		{
 			name: "Test normal string, no vars, match success",
@@ -121,11 +122,10 @@ func TestPathSegment_SegMatchAndExtractVars(t *testing.T) {
 
 			},
 			want: true,
-			want1: &EnvEntry{
-				name: "burrito",
-				isStr: true,
-				valStr: "f",
-			},
+			want1: environment.CreateStringEntry(
+				"burrito",
+				"f",
+			),
 		},
 		{
 			name: "Test var with int type, matching",
@@ -139,11 +139,10 @@ func TestPathSegment_SegMatchAndExtractVars(t *testing.T) {
 
 			},
 			want: true,
-			want1: &EnvEntry{
-				name: "burrito",
-				isInt: true,
-				valInt: 44,
-			},
+			want1: environment.CreateIntEntry(
+				"burrito",
+				44,
+			),
 		},
 		{
 			name: "Test var with int type, not matching",
@@ -170,11 +169,10 @@ func TestPathSegment_SegMatchAndExtractVars(t *testing.T) {
 				str: "44.3",
 			},
 			want: true,
-			want1: &EnvEntry{
-				name: "burrito",
-				isFlt: true,
-				valFlt: 44.3,
-			},
+			want1: environment.CreateFloatEntry(
+				"burrito",
+				44.3,
+			),
 		},
 		{
 			name: "Test var with float type, not matching",

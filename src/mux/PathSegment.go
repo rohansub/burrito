@@ -1,11 +1,15 @@
 package mux
 
 import (
+	"github.com/rcsubra2/burrito/src/environment"
 	"strconv"
 	"strings"
 )
 
-type PathSegment struct{
+// PathSegment - represents one "Segment" of a path (ie. the path
+// "/zesty/breakfast/burrito" would be split into "zesty", "breakfast"
+// and "burrito"
+type PathSegment struct {
 	mustMatch bool
 	segStr    string
 	typeMatch string
@@ -17,7 +21,7 @@ type PathSegment struct{
 
 // SegMatch - determine if a string matches the given segment
 //            returns true, and an EnvEntry if there is a variable in the string
-func (ps * PathSegment) SegMatchAndExtractVars(str string) (bool, *EnvEntry) {
+func (ps * PathSegment) SegMatchAndExtractVars(str string) (bool, *environment.EnvEntry) {
 	if ps.mustMatch {
 
 		return (ps.segStr == str), nil;
@@ -28,7 +32,7 @@ func (ps * PathSegment) SegMatchAndExtractVars(str string) (bool, *EnvEntry) {
 		if err != nil {
 			return false, nil;
 		}
-		return true, CreateIntEntry(ps.varName, i);
+		return true, environment.CreateIntEntry(ps.varName, i);
 
 	} else if (ps.typeMatch == "float") {
 
@@ -36,18 +40,15 @@ func (ps * PathSegment) SegMatchAndExtractVars(str string) (bool, *EnvEntry) {
 		if err != nil {
 			return false, nil;
 		}
-		return true, CreateFloatEntry(ps.varName, f);
+		return true, environment.CreateFloatEntry(ps.varName, f);
 
 	} else { // Otherwise, it must be a string
 
-		return true, CreateStringEntry(ps.varName, str);
+		return true, environment.CreateStringEntry(ps.varName, str);
 	}
 }
 
-
-
-
-
+// NewPathSegment - creates a PathSegment from a string representation
 func NewPathSegment(str string) *PathSegment {
 	if len(str) == 0 {
 		return &PathSegment{

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rcsubra2/burrito/src/environment"
 	"github.com/rcsubra2/burrito/src/mux"
 	"github.com/rcsubra2/burrito/src/parser"
 )
@@ -27,7 +28,7 @@ func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
 	return server
 }
 
-func (bs *BurritoServer) render(res parser.Resp, w http.ResponseWriter, r *http.Request) bool {
+func (bs *BurritoServer) render(res parser.Resp, w http.ResponseWriter, r *http.Request, env * environment.Env) bool {
 	if res.RespType == "FILE" {
 		w.Header().Set("Content-type", "text/html")
 		f, err := ioutil.ReadFile(string(res.Body))
@@ -50,9 +51,9 @@ func (bs *BurritoServer) render(res parser.Resp, w http.ResponseWriter, r *http.
 }
 
 // renderChain - render the list of Resp objects, until a data response is sent
-func (bs *BurritoServer) renderChain(responses []parser.Resp, w http.ResponseWriter, r *http.Request) {
+func (bs *BurritoServer) renderChain(responses []parser.Resp, w http.ResponseWriter, r *http.Request, env * environment.Env) {
 	for i, res := range responses {
-		isRedirect := bs.render(res, w, r)
+		isRedirect := bs.render(res, w, r, env)
 		if !isRedirect {
 			if i != len(responses)-1 {
 				log.Println("WARN: Response sent before all actions completed!")
@@ -64,10 +65,10 @@ func (bs *BurritoServer) renderChain(responses []parser.Resp, w http.ResponseWri
 
 // addHandler - for given path and method map
 func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.Resp) {
-	bs.router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	bs.router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request, env * environment.Env) {
 		for k, v := range methodMap {
 			if r.Method == k {
-				bs.renderChain(v, w, r)
+				bs.renderChain(v, w, r, env)
 			}
 		}
 	})
