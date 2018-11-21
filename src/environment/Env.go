@@ -27,6 +27,29 @@ func (e * Env) Get(entryName string) *EnvEntry{
 	return &entry
 }
 
+func (e * Env) GetValue(entryName string) interface{}{
+	entry, ok := e.data[entryName]
+	if !ok {
+		return nil
+	}
+	if entry.isStr {
+		return entry.valStr
+	} else if entry.isFlt {
+		return entry.valFlt
+	} else { // otherwise it is an int
+		return entry.valInt
+	}
+}
+
+
+func (e * Env) Data() map[string]interface{}{
+	d := make(map[string]interface{})
+	for k, _ := range e.data {
+		d[k] = e.GetValue(k)
+	}
+	return d
+}
+
 
 // EnvEntry - Consists of an Variable name, as well as a value. Value can be a string,
 // float64, or int64
@@ -65,4 +88,18 @@ func CreateStringEntry(name string, st string) *EnvEntry {
 		valStr: st,
 		isStr: true,
 	}
+}
+
+type BurritoTemplateData struct {
+	Url interface{}
+	Data interface{}
+}
+
+
+func CreateBurritoTemplateData(urlEnv * Env, respEnv * Env) BurritoTemplateData{
+	t := BurritoTemplateData{}
+
+	t.Url = urlEnv.Data()
+	t.Data = respEnv.Data()
+	return t
 }
