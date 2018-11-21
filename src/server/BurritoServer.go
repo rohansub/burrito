@@ -7,18 +7,18 @@ import (
 	"net/http"
 
 	"github.com/rcsubra2/burrito/src/environment"
-	"github.com/rcsubra2/burrito/src/mux"
+	"github.com/rcsubra2/burrito/src/handler"
 	"github.com/rcsubra2/burrito/src/parser"
 )
 
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
-	router *mux.Router
+	router *handler.Router
 }
 
 // NewBurritoServer  create server server, and initialize route handlers
 func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
-	r := mux.NewRouter()
+	r := handler.NewRouter()
 	server := &BurritoServer{
 		router: r,
 	}
@@ -39,12 +39,11 @@ func (bs *BurritoServer) render(res parser.Resp, w http.ResponseWriter, r *http.
 		w.Write(f)
 		return false
 	} else if res.RespType == "STR" {
-		// TODO
 		w.Header().Set("Content-type", "text/html")
 		fmt.Fprintf(w, res.Body)
 		return false
 	} else if res.RespType == "CONT" {
-		// TODO
+		// TODO: Support values that do not immediately redirect
 		return true
 	}
 	return false

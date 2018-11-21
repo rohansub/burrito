@@ -1,4 +1,4 @@
-package mux
+package handler
 
 import (
 	"github.com/rcsubra2/burrito/src/environment"
