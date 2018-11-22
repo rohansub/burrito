@@ -34,20 +34,20 @@ func TestEnv_Add(t *testing.T) {
 		entry EnvEntry
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
+		name        string
+		fields      fields
+		args        args
 		fieldsAfter fields
 	}{
 		{
 			name: "Add field when variable not in Env",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{},
 			},
-			args: args {
+			args: args{
 				entry: *CreateIntEntry("name", 5),
 			},
-			fieldsAfter: fields {
+			fieldsAfter: fields{
 				data: map[string]EnvEntry{
 					"name": *CreateIntEntry("name", 5),
 				},
@@ -55,15 +55,15 @@ func TestEnv_Add(t *testing.T) {
 		},
 		{
 			name: "Add field when variable is already in Env",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"name": *CreateStringEntry("name", "old"),
 				},
 			},
-			args: args {
+			args: args{
 				entry: *CreateIntEntry("name", 5),
 			},
-			fieldsAfter: fields {
+			fieldsAfter: fields{
 				data: map[string]EnvEntry{
 					"name": *CreateIntEntry("name", 5),
 				},
@@ -100,22 +100,22 @@ func TestEnv_Get(t *testing.T) {
 	}{
 		{
 			name: "Test Get, item in environment",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"zesty": *CreateStringEntry("zesty", "burrito"),
 				},
 			},
-			args: args {
+			args: args{
 				"zesty",
 			},
 			want: CreateStringEntry("zesty", "burrito"),
 		},
 		{
 			name: "Test Get, item not found in environment",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{},
 			},
-			args: args {
+			args: args{
 				"zesty",
 			},
 			want: nil,
@@ -145,13 +145,13 @@ func TestCreateIntEntry(t *testing.T) {
 	}{
 		{
 			name: "Test Create Int Entry",
-			args: args {
+			args: args{
 				name: "siesta",
-				i: 0xBAADF00D,
+				i:    0xBAADF00D,
 			},
 			want: &EnvEntry{
-				name: "siesta",
-				isInt: true,
+				name:   "siesta",
+				isInt:  true,
 				valInt: 0xBAADF00D,
 			},
 		},
@@ -177,13 +177,13 @@ func TestCreateFloatEntry(t *testing.T) {
 	}{
 		{
 			name: "Test Create Float Entry",
-			args: args {
+			args: args{
 				name: "siesta",
-				f: 66.66,
+				f:    66.66,
 			},
 			want: &EnvEntry{
-				name: "siesta",
-				isFlt: true,
+				name:   "siesta",
+				isFlt:  true,
 				valFlt: 66.66,
 			},
 		},
@@ -209,13 +209,13 @@ func TestCreateStringEntry(t *testing.T) {
 	}{
 		{
 			name: "Test Create Float Entry",
-			args: args {
+			args: args{
 				name: "siesta",
-				st: "fiesta",
+				st:   "fiesta",
 			},
 			want: &EnvEntry{
-				name: "siesta",
-				isStr: true,
+				name:   "siesta",
+				isStr:  true,
 				valStr: "fiesta",
 			},
 		},
@@ -224,6 +224,184 @@ func TestCreateStringEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := CreateStringEntry(tt.args.name, tt.args.st); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateStringEntry() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCreateBurritoTemplateData(t *testing.T) {
+	type args struct {
+		urlEnv  *Env
+		respEnv *Env
+	}
+	tests := []struct {
+		name string
+		args args
+		want BurritoTemplateData
+	}{
+		{
+			name: "Create Empty Burrito Template",
+			args: args{
+				urlEnv: &Env{
+					map[string]EnvEntry{},
+				},
+				respEnv: &Env{
+					map[string]EnvEntry{},
+				},
+			},
+			want: BurritoTemplateData{
+				Url: (&Env{
+					map[string]EnvEntry{},
+				}).Data(),
+				Data: (&Env{
+					map[string]EnvEntry{},
+				}).Data(),
+			},
+		},
+		{
+			name: "Create Burrito Template - contains data",
+			args: args{
+				urlEnv: &Env{
+					map[string]EnvEntry{
+						"hello": *CreateIntEntry("hello", 1),
+						"zesty": *CreateStringEntry("zesty", "burrito"),
+						"siesta": *CreateFloatEntry("siesta", 999.9),
+					},
+				},
+				respEnv: &Env{
+					map[string]EnvEntry{
+						"rhello": *CreateIntEntry("rhello", 1),
+						"rzesty": *CreateStringEntry("rzesty", "burrito"),
+						"rsiesta": *CreateFloatEntry("rsiesta", 999.9),
+					},
+				},
+			},
+			want: BurritoTemplateData{
+				Url: (&Env{
+					map[string]EnvEntry{
+						"hello": *CreateIntEntry("hello", 1),
+						"zesty": *CreateStringEntry("zesty", "burrito"),
+						"siesta": *CreateFloatEntry("siesta", 999.9),
+					},
+				}).Data(),
+				Data: (&Env{
+					map[string]EnvEntry{
+						"rhello": *CreateIntEntry("rhello", 1),
+						"rzesty": *CreateStringEntry("rzesty", "burrito"),
+						"rsiesta": *CreateFloatEntry("rsiesta", 999.9),
+					},
+				}).Data(),
+			},
+		},
+
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CreateBurritoTemplateData(tt.args.urlEnv, tt.args.respEnv); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CreateBurritoTemplateData() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnv_GetValue(t *testing.T) {
+	type fields struct {
+		data map[string]EnvEntry
+	}
+	type args struct {
+		entryName string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   interface{}
+	}{
+		{
+			name: "Get Value int",
+			fields: fields {
+				data: map[string]EnvEntry{
+					"key": *CreateIntEntry("key", 4),
+				},
+			},
+			args: args{"key"},
+			want: int64(4),
+		},
+		{
+			name: "Get Value str",
+			fields: fields {
+				data: map[string]EnvEntry{
+					"key": *CreateStringEntry("key", "hello"),
+				},
+			},
+			args: args{"key"},
+			want: "hello",
+		},
+		{
+			name: "Get Value float",
+			fields: fields {
+				data: map[string]EnvEntry{
+					"key": *CreateFloatEntry("key", 4.2),
+				},
+			},
+			args: args{"key"},
+			want: 4.2,
+		},
+		{
+			name: "Key not in Env",
+			fields: fields {
+				data: map[string]EnvEntry{
+					"key": *CreateFloatEntry("key", 4.2),
+				},
+			},
+			args: args{"not"},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &Env{
+				data: tt.fields.data,
+			}
+			if got := e.GetValue(tt.args.entryName); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Env.GetValue() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnv_Data(t *testing.T) {
+	type fields struct {
+		data map[string]EnvEntry
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   map[string]interface{}
+	}{
+		{
+			name: "Extract data values",
+			fields: fields {
+				data: map[string]EnvEntry{
+					"i": *CreateIntEntry("i", 1),
+					"f": *CreateFloatEntry("f", 1.2),
+					"st": *CreateStringEntry("st", "GG"),
+				},
+			},
+			want: map[string]interface{}{
+				"i": int64(1),
+				"f": 1.2,
+				"st": "GG",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := &Env{
+				data: tt.fields.data,
+			}
+			if got := e.Data(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Env.Data() = %v, want %v", got, tt.want)
 			}
 		})
 	}
