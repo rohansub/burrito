@@ -37,20 +37,18 @@ func (bs *BurritoServer) render(
 ) bool {
 	if res.RespType == "FILE" {
 		w.Header().Set("Content-type", "text/html")
-		f, err := template.ParseFiles(res.Body)
+		f, err := template.ParseFiles(res.Body.(string))
 		if err != nil {
 			w.WriteHeader(404)
 			w.Write([]byte("404 Something went wrong - " + http.StatusText(404)))
 		}
 		d := environment.CreateBurritoTemplateData(urlEnv, respEnv)
-		fmt.Println(f)
-
 		f.Execute(w, &d)
 		return false
 
 	} else if res.RespType == "STR" {
 		w.Header().Set("Content-type", "text/html")
-		fmt.Fprintf(w, res.Body)
+		fmt.Fprintf(w, res.Body.(string))
 		return false
 
 	} else if res.RespType == "CONT" {
@@ -68,8 +66,9 @@ func (bs *BurritoServer) renderChain(
 	urlEnv * environment.Env,
 	respEnv * environment.Env,
 ) {
+	isRedirect := false
 	for i, res := range responses {
-		isRedirect := bs.render(res, w, r, urlEnv, respEnv)
+		isRedirect = bs.render(res, w, r, urlEnv, respEnv)
 		if !isRedirect {
 			if i != len(responses)-1 {
 				log.Println("WARN: Response sent before all actions completed!")

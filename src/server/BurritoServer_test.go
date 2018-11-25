@@ -1,25 +1,29 @@
 package server
 
 import (
+	"github.com/rcsubra2/burrito/src/parser"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
-	"github.com/rcsubra2/burrito/src/parser"
 )
 
 func TestBurritoServer_Run(t *testing.T) {
 	type fields struct {
 		Routes *parser.ParsedRoutes
 	}
+	type arg struct {
+		method string
+		uri    string
+		want   string
+	}
 	tests := []struct {
 		name   string
 		fields fields
+		args []arg
 	}{
-		// TODO: Add test cases.
 		{
-			name: "Standard Server Test",
+			name: "Standard Server String and file data only",
 			fields: fields{
 				Routes: &parser.ParsedRoutes{
 					Routes: map[string]map[string][]parser.Resp{
@@ -48,6 +52,61 @@ func TestBurritoServer_Run(t *testing.T) {
 					},
 				},
 			},
+			args: []arg{
+				{
+					method: "GET",
+					uri: "/",
+					want: "<p>Hello</p>",
+				},
+				{
+					method: "GET",
+					uri: "/hello",
+					want: "<p>World</p>",
+				},
+				{
+					method: "PUT",
+					uri: "/hello",
+					want: "I am zesty",
+				},
+			},
+		},
+		{
+			name: "Standard Server String data Generics",
+			fields: fields{
+				Routes: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/": {
+							"GET": []parser.Resp{
+								parser.Resp{
+									RespType: "FILE",
+									Body:     "../../test_html/hello.html",
+								},
+							},
+						},
+						"/zesty/:burrito": {
+							"GET": []parser.Resp{
+								parser.Resp{
+									RespType: "FILE",
+									Body:     "../../test_html/template.html",
+								},
+							},
+						},
+					},
+				},
+			},
+			args: []arg{
+				{
+					method: "GET",
+					uri: "/",
+					want: "<p>Hello</p>",
+				},
+				{
+					method: "GET",
+					uri: "/zesty/fool",
+					want: "<h>fool</h>",
+				},
+			},
+
 		},
 	}
 	for _, tt := range tests {
@@ -56,40 +115,21 @@ func TestBurritoServer_Run(t *testing.T) {
 
 			// source: https://stackoverflow.com/questions/16154999/how-to-test-http-calls-in-go-using-httptest
 			resp := httptest.NewRecorder()
-			req, _ := http.NewRequest("GET", "/", nil)
 
-			b.router.ServeHTTP(resp, req)
-			if p, err := ioutil.ReadAll(resp.Body); err != nil {
-				t.Fail()
-			} else {
-				if !strings.Contains(string(p), "<p>Hello</p>") {
-					t.Errorf("header response doen't match:\n%s", p)
+			for _, ar := range tt.args {
+				req, _ := http.NewRequest(ar.method, ar.uri, nil)
+
+				b.router.ServeHTTP(resp, req)
+				if p, err := ioutil.ReadAll(resp.Body); err != nil {
+					t.Fail()
+				} else {
+					if string(p) != ar.want {
+						t.Errorf("Want %s - Got %s", ar.want, p)
+					}
 				}
 			}
 
-			// Test /hello
-			req, _ = http.NewRequest("GET", "/hello", nil)
 
-			b.router.ServeHTTP(resp, req)
-			if p, err := ioutil.ReadAll(resp.Body); err != nil {
-				t.Fail()
-			} else {
-				if !strings.Contains(string(p), "<p>World</p>") {
-					t.Errorf("header response doen't match:\n%s", p)
-				}
-			}
-
-			// Test /hello, PUT
-			req, _ = http.NewRequest("PUT", "/hello", nil)
-
-			b.router.ServeHTTP(resp, req)
-			if p, err := ioutil.ReadAll(resp.Body); err != nil {
-				t.Fail()
-			} else {
-				if !strings.Contains(string(p), "I am zesty") {
-					t.Errorf("header response doen't match:\n%s", p)
-				}
-			}
 
 		})
 	}

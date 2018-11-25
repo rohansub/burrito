@@ -46,6 +46,30 @@ func Test_createResp(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "JSON data",
+			args: args{
+				respStr: `{ "hello" : "world", "zesty": { "breakfast" : "burrito" } } `,
+			},
+			want: Resp{
+				RespType: "JSON",
+				Body:     map[string]interface{}{
+					"hello": "world",
+					"zesty": map[string]interface{}{
+						"breakfast": "burrito",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "JSON data, invalid format",
+			args: args{
+				respStr: `{ "hello" :world", "zesty": { "breakfast" : "burrito" } } `,
+			},
+			want: Resp{},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

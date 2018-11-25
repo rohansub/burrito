@@ -67,7 +67,7 @@ func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 			m := "Failed to compile this line: " + line
 			return ParsedRoutes{}, errors.New(m)
 		}
-		arg, err := createArg(parts[0])
+		arg, err := createArg(str.Trim(parts[0], " "))
 		if err != nil {
 			m := "Failed to compile this line: " + line
 			return ParsedRoutes{}, errors.New(m)

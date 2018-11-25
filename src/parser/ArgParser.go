@@ -29,7 +29,7 @@ type Arg struct {
 
 func getPath(path string) (string, error){
 	expTwoParams := re.MustCompile(PATHRE)
-	if expTwoParams.MatchString(path) {
+	if expTwoParams.Match([]byte(path)) {
 		matches := expTwoParams.FindStringSubmatch(path)
 		return matches[1], nil
 	}
@@ -38,7 +38,7 @@ func getPath(path string) (string, error){
 
 func getMethod(method string) (string, error){
 	expTwoParams := re.MustCompile(TYPERE)
-	if expTwoParams.MatchString(method) {
+	if expTwoParams.Match([]byte(method)) {
 		matches := expTwoParams.FindStringSubmatch(method)
 		return matches[1], nil
 	}
@@ -51,11 +51,11 @@ func getMethod(method string) (string, error){
  */
 func createArg(argStr string) (Arg, error) {
 	// Check to see if both path and request are given
-	expTwoParams := re.MustCompile(`\(([^,]*),([^,]*)\)`)
+	expTwoParams := re.MustCompile(`^(\(([^,]*),([^,]*)\))$`)
 	if expTwoParams.MatchString(argStr) {
 		matches := expTwoParams.FindStringSubmatch(argStr)
-		pth, err1 := getPath(matches[1])
-		meth, err2 := getMethod(matches[2])
+		pth, err1 := getPath(matches[2])
+		meth, err2 := getMethod(matches[3])
 
 		if err1 == nil && err2 == nil {
 			return Arg{
@@ -67,12 +67,12 @@ func createArg(argStr string) (Arg, error) {
 
 	}
 	// Check to see if only path is specified
-	expOneParam := re.MustCompile(`\(` + PATHRE + `\)`)
+	expOneParam := re.MustCompile(`^(\(` + PATHRE + `\))$`)
 	if expOneParam.MatchString(argStr) {
 		matches := expOneParam.FindStringSubmatch(argStr)
 		return Arg{
 			reqType: GET,
-			path:    matches[1],
+			path:    matches[2],
 		}, nil
 	}
 	// Check to see if no parameters are specified

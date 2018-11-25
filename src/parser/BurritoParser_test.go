@@ -166,6 +166,16 @@ func TestParseBurritoFile(t *testing.T) {
 							},
 						},
 					},
+					"/zesty": {
+						"GET": []Resp{
+							Resp{
+								RespType: "JSON",
+								Body:     map[string]interface{}{
+									"breakfast" : "burrito",
+								},
+							},
+						},
+					},
 				},
 			},
 		},

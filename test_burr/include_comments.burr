@@ -3,3 +3,4 @@
 # comment
 ('/hello', 'GET') => 'hello';
 ('/hello', 'PUT') => 'hello';
+('/zesty', 'GET') => {"breakfast": "burrito"};
