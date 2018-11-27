@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/rcsubra2/burrito/src/db"
 	"reflect"
 	"testing"
 )
@@ -15,7 +16,6 @@ func Test_createResp(t *testing.T) {
 		want    Resp
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "File data test",
 			args: args{
@@ -69,6 +69,44 @@ func Test_createResp(t *testing.T) {
 			},
 			want: Resp{},
 			wantErr: true,
+		},
+		{
+			name: "JSON data Single Item",
+			args: args{
+				respStr: `{ "hello" : "world" } `,
+			},
+			want: Resp{
+				RespType: "JSON",
+				Body:     map[string]interface{}{
+					"hello": "world",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "DB data",
+			args: args{
+				respStr: `DB.GET(varname,'hello',)`,
+			},
+			want: Resp{
+				RespType: "DB",
+				Body:    db.Req{
+					"GET",
+					db.GetReq{
+						ArgNames: []db.Param{
+							db.Param{
+								false,
+								"varname",
+							},
+							db.Param{
+								true,
+								"hello",
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {

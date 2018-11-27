@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/rcsubra2/burrito/src/db"
 	"html/template"
 	"log"
 	"net/http"
@@ -14,6 +16,7 @@ import (
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
 	router *handler.Router
+	client *db.RedisClient
 }
 
 // NewBurritoServer  create server server, and initialize route handlers
@@ -21,12 +24,27 @@ func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
 	r := handler.NewRouter()
 	server := &BurritoServer{
 		router: r,
+		client: db.NewRedisClient("localhost:9000"),
 	}
 	for k, methodMap := range rts.Routes {
 		server.addHandler(k, methodMap)
 	}
 	return server
 }
+
+func (bs *BurritoServer) queryDB(res parser.Resp, urlEnv *environment.Env, respEnv *environment.Env) {
+	req, ok := res.Body.(db.Req)
+	if ok {
+		if req.Method == "GET" {
+			data := bs.client.Get(req.GetReq, []*environment.Env{urlEnv, respEnv})
+			for k, v := range data {
+				entry := *environment.CreateStringEntry(k, v)
+				respEnv.Add(entry)
+			}
+		}
+	}
+}
+
 
 func (bs *BurritoServer) render(
 	res parser.Resp,
@@ -50,9 +68,11 @@ func (bs *BurritoServer) render(
 		w.Header().Set("Content-type", "text/html")
 		fmt.Fprintf(w, res.Body.(string))
 		return false
-
-	} else if res.RespType == "CONT" {
-		// TODO: Support values that do not immediately redirect
+	} else if res.RespType == "JSON" {
+		WriteJson(w, res.Body)
+		return false
+	} else if res.RespType == "DB" {
+		bs.queryDB(res, urlEnv, respEnv)
 		return true
 	}
 	return false
@@ -66,17 +86,25 @@ func (bs *BurritoServer) renderChain(
 	urlEnv * environment.Env,
 	respEnv * environment.Env,
 ) {
-	isRedirect := false
+	chainContinue := true
 	for i, res := range responses {
-		isRedirect = bs.render(res, w, r, urlEnv, respEnv)
-		if !isRedirect {
+		chainContinue = bs.render(res, w, r, urlEnv, respEnv)
+		if !chainContinue {
 			if i != len(responses)-1 {
 				log.Println("WARN: Response sent before all actions completed!")
 			}
 			break
 		}
+		fmt.Println(respEnv)
+	}
+	fmt.Println(respEnv)
+	// TODO: check if no response was sent back, if so send back the respEnv as JSON
+	if chainContinue {
+		WriteJson(w, respEnv.Data())
 	}
 }
+
+
 
 // addHandler - for given path and method map
 func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.Resp) {
@@ -94,4 +122,16 @@ func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.R
 // Run - run the burrito server
 func (bs *BurritoServer) Run() {
 	log.Fatal(http.ListenAndServe(":8080", bs.router))
+}
+
+
+// Write interface as JSON to http.ResponseWriter
+func WriteJson(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-type", "app/json")
+	json, err := json.Marshal(data)
+	if err != nil {
+		panic("Error: json data not parsed correctly")
+	} else {
+		w.Write(json)
+	}
 }

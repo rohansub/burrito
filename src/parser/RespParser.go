@@ -8,7 +8,7 @@ import (
 
 // Resp struct representing Response - contains a Body and a RespType
 type Resp struct {
-	RespType string // FILE or JSON or STR or REDIS
+	RespType string // FILE or JSON or STR or DB
 	Body     interface{}
 }
 
@@ -32,6 +32,15 @@ func createResp(respStr string) (Resp, error) {
 			Body:     matches[2],
 		}, nil
 	}
+
+	isDB := createRespForDB(respStr)
+	if isDB != nil {
+		return Resp{
+			RespType: "DB",
+			Body: 	  *isDB,
+		}, nil
+	}
+
 
 	var data interface{}
 	err := json.Unmarshal([]byte(respStr), &data)
