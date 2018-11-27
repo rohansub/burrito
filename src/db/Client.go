@@ -5,13 +5,13 @@ import (
 	"github.com/rcsubra2/burrito/src/environment"
 )
 
-// DBClient -
+// DBClient - The interface for database clients
 type DBClient interface {
 	Get(GetReq, []*environment.Env) map[string]string
 }
 
 
-
+// RedisClient - A client that interacts with Redis data
 type RedisClient struct {
 	db *redis.Client
 }
@@ -22,14 +22,13 @@ func NewRedisClient(uri string) *RedisClient {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	// Output: PONG <nil>
 	return &RedisClient {
 		db: client,
 	}
 
 }
 
-
+// Get - Perform GetReq req given a list of environments
 func (rc *RedisClient) Get(req GetReq, envs []*environment.Env) map[string]string {
 	keys := make([]string, len(req.ArgNames))
 	for i, ar := range req.ArgNames {

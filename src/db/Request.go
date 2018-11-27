@@ -16,6 +16,7 @@ type Param struct {
 	Val 	string
 }
 
+// GetValue - given a list of environments find the value of the parameter
 func (p* Param) GetValue(envs []*environment.Env) (string, bool){
 	if p.IsString {
 		return p.Val, true
