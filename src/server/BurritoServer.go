@@ -12,11 +12,10 @@ import (
 	"github.com/rcsubra2/burrito/src/handler"
 	"github.com/rcsubra2/burrito/src/parser"
 )
-
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
 	router *handler.Router
-	client *db.RedisClient
+	client db.Database
 }
 
 // NewBurritoServer  create server server, and initialize route handlers
@@ -24,7 +23,7 @@ func NewBurritoServer(rts *parser.ParsedRoutes) *BurritoServer {
 	r := handler.NewRouter()
 	server := &BurritoServer{
 		router: r,
-		client: db.NewRedisClient("localhost:9000"),
+		client: db.NewRedisDB("localhost:9000"),
 	}
 	for k, methodMap := range rts.Routes {
 		server.addHandler(k, methodMap)
@@ -95,9 +94,7 @@ func (bs *BurritoServer) renderChain(
 			}
 			break
 		}
-		fmt.Println(respEnv)
 	}
-	fmt.Println(respEnv)
 	// TODO: check if no response was sent back, if so send back the respEnv as JSON
 	if chainContinue {
 		WriteJson(w, respEnv.Data())

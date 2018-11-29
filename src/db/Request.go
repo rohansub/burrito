@@ -9,6 +9,7 @@ import (
 type Req struct {
 	Method string
 	GetReq GetReq
+
 }
 
 type Param struct {

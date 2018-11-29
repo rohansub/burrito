@@ -60,7 +60,6 @@ func (h *Router) HandleFunc(pattern string, handler func(http.ResponseWriter, *h
 func (h *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, route := range h.routes {
 		match, env := route.Match(r.URL.Path)
-		// TODO: ADD to env is necessary
 		if match {
 			route.handler.ServeHTTP(w, r, env)
 			return

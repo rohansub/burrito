@@ -19,6 +19,7 @@ func createRespForDB(respStr string) (*db.Req) {
 			GetReq: *gr,
 		}
 	}
+
 	return nil
 }
 
