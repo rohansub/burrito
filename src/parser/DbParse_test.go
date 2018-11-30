@@ -77,6 +77,36 @@ func Test_createRespForDB(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Test SET",
+			args: args {
+				"DB.SET((zesty,'burrito'), ('zesty2',burrito2),)",
+			},
+			want: &db.SetReq{
+				ArgNames: []db.Pair{
+					{
+						Fst: db.Param {
+							IsString: false,
+							Val: "zesty",
+						},
+						Snd: db.Param {
+							IsString: true,
+							Val: "burrito",
+						},
+					},
+					{
+						Fst: db.Param {
+							IsString: true,
+							Val: "zesty2",
+						},
+						Snd: db.Param {
+							IsString: false,
+							Val: "burrito2",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

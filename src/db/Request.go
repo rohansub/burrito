@@ -40,24 +40,9 @@ type GetReq struct {
 // CreateDBGetReq - creates database get request given a list of string arguments
 func CreateDBGetReq(argStrs []string) *GetReq {
 	args := make([]Param, 0)
-	str := re.MustCompile(`^'(\w*)'$`)
-
 	for _, s := range argStrs {
 		stripped := strings.Trim(s, " ")
-		var arg Param
-		// check if it is a string
-		if str.MatchString(stripped) {
-			matches := str.FindStringSubmatch(stripped)
-			arg = Param{
-				IsString: true,
-				Val: matches[1],
-			}
-		} else { // otherwise it is a variable
-			arg = Param{
-				IsString: false,
-				Val: stripped,
-			}
-		}
+		var arg Param = extractParam(stripped)
 		args = append(args, arg)
 	}
 	return &GetReq{
@@ -76,4 +61,60 @@ func (r * GetReq) Run(client Database, envs []*environment.Env) map[string]strin
 	}
 
 	return client.Get(keys)
+}
+
+type Pair struct {
+	Fst Param
+	Snd Param
+}
+
+
+type SetReq struct {
+	ArgNames []Pair
+}
+
+// CreateDBGetReq - creates database get request given a list of string arguments
+func CreateDBSetReq(argStrs []string) *SetReq {
+	args := make([]Pair, 0)
+	for _, s := range argStrs {
+		stripped := strings.Trim(s, " ")
+		rePair := re.MustCompile(`\(\s*(.*)\s*,\s*(.*)\s*\)`)
+		if rePair.MatchString(stripped){
+			matches := rePair.FindStringSubmatch(stripped)
+			p := Pair {
+				Fst: extractParam(matches[1]),
+				Snd: extractParam(matches[2]),
+			}
+			args = append(args, p)
+		} else {
+			panic("CreateDBSetReq not called correctly!, " +
+				"list of strings cannot be parsed into SetReq")
+		}
+
+		extractParam(stripped)
+	}
+	return &SetReq{
+		ArgNames: args,
+	}
+}
+
+func (req * SetReq) Run(client Database, envs []*environment.Env) map[string]string {
+	return nil
+}
+
+
+func extractParam(strParam string) Param{
+	strRE := re.MustCompile(`^'(\w*)'$`)
+	if strRE.MatchString(strParam) {
+		matches := strRE.FindStringSubmatch(strParam)
+		return Param{
+			IsString: true,
+			Val:      matches[1],
+		}
+	} else { // otherwise it is a variable
+		return Param{
+			IsString: false,
+			Val:      strParam,
+		}
+	}
 }
