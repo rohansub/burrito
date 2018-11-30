@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/go-redis/redis"
 	"github.com/rcsubra2/burrito/src/environment"
 )
 
@@ -11,12 +10,8 @@ type RedisDB struct {
 }
 
 // NewRedisDB - create RedisDB client, given uri
-func NewRedisDB(uri string) *RedisDB {
-	client := redis.NewClient(&redis.Options{
-		Addr:     uri,
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
+func NewRedisDB(client RedisDBInterface) *RedisDB {
+
 
 	return &RedisDB{
 		db: client,

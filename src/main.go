@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	serv := server.NewBurritoServer(&routes)
+	serv := server.NewBurritoServer(&routes, nil)
 
 	serv.Run()
 }
