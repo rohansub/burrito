@@ -47,16 +47,12 @@ func NewBurritoServer(
 }
 
 func (bs *BurritoServer) queryDB(res parser.Resp, urlEnv *environment.Env, respEnv *environment.Env) {
-	req, ok := res.Body.(db.Req)
-	if ok {
-		if req.Method == "GET" {
-			data := bs.client.Get(req.GetReq, []*environment.Env{urlEnv, respEnv})
-			for k, v := range data {
-				entry := *environment.CreateStringEntry(k, v)
-				respEnv.Add(entry)
-			}
-		}
+	data := res.DBReq.Run(bs.client, []*environment.Env{respEnv, urlEnv})
+	for k, v := range data {
+		entry := *environment.CreateStringEntry(k, v)
+		respEnv.Add(entry)
 	}
+
 }
 
 

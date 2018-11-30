@@ -157,14 +157,11 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									Body:  db.Req{
-										Method: "GET",
-										GetReq: db.GetReq{
-											ArgNames: []db.Param{
-												{
-													IsString: true,
-													Val: "zesty",
-												},
+									DBReq:  &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: true,
+												Val: "zesty",
 											},
 										},
 									},
@@ -198,14 +195,11 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									Body:  db.Req{
-										Method: "GET",
-										GetReq: db.GetReq{
-											ArgNames: []db.Param{
-												{
-													IsString: false,
-													Val: "zesty",
-												},
+									DBReq:  &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: false,
+												Val: "zesty",
 											},
 										},
 									},
@@ -239,18 +233,15 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									Body:  db.Req{
-										Method: "GET",
-										GetReq: db.GetReq{
-											ArgNames: []db.Param{
-												{
-													IsString: false,
-													Val: "zesty",
-												},
-												{
-													IsString: true,
-													Val: "quesadilla",
-												},
+									DBReq:  &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: false,
+												Val: "zesty",
+											},
+											{
+												IsString: true,
+												Val: "quesadilla",
 											},
 										},
 									},
@@ -286,18 +277,15 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									Body:  db.Req{
-										Method: "GET",
-										GetReq: db.GetReq{
-											ArgNames: []db.Param{
-												{
-													IsString: false,
-													Val: "zesty",
-												},
-												{
-													IsString: true,
-													Val: "quesadilla",
-												},
+									DBReq:   &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: false,
+												Val: "zesty",
+											},
+											{
+												IsString: true,
+												Val: "quesadilla",
 											},
 										},
 									},

@@ -14,46 +14,41 @@ func Test_createRespForDB(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *db.Req
+		want db.Req
 	}{
 		{
 			name: "Test Strings",
 			args: args {
 				"DB.GET('hello','world',)",
 			},
-			want: &db.Req{
-				"GET",
-				db.GetReq{
-					ArgNames: []db.Param{
-						{
-							IsString: true,
-							Val:      "hello",
-						},
-						{
-							IsString: true,
-							Val:      "world",
-						},
+			want: &db.GetReq {
+				ArgNames: []db.Param{
+					{
+						IsString: true,
+						Val:      "hello",
+					},
+					{
+						IsString: true,
+						Val:      "world",
 					},
 				},
 			},
+
 		},
 		{
 			name: "Test Variables",
 			args: args {
 				"DB.GET(zesty, burrito,)",
 			},
-			want: &db.Req{
-				"GET",
-				db.GetReq{
-					ArgNames: []db.Param{
-						{
-							IsString: false,
-							Val:      "zesty",
-						},
-						{
-							IsString: false,
-							Val:      "burrito",
-						},
+			want: &db.GetReq{
+				ArgNames: []db.Param{
+					{
+						IsString: false,
+						Val:      "zesty",
+					},
+					{
+						IsString: false,
+						Val:      "burrito",
 					},
 				},
 			},
@@ -64,24 +59,21 @@ func Test_createRespForDB(t *testing.T) {
 			args: args {
 				"DB.GET(zesty, 'burrito', tomorrow,)",
 			},
-			want: &db.Req{
-				"GET",
-				db.GetReq{
-					ArgNames: []db.Param{
-						{
-							IsString: false,
-							Val: "zesty",
-						},
-						{
-							IsString: true,
-							Val: "burrito",
-						},
-						{
-							IsString: false,
-							Val: "tomorrow",
-						},
-
+			want: &db.GetReq{
+				ArgNames: []db.Param{
+					{
+						IsString: false,
+						Val: "zesty",
 					},
+					{
+						IsString: true,
+						Val: "burrito",
+					},
+					{
+						IsString: false,
+						Val: "tomorrow",
+					},
+
 				},
 			},
 		},

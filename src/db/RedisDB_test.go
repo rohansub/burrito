@@ -1,11 +1,10 @@
 package db
 
 import (
-	"github.com/rcsubra2/burrito/src/mockredis"
 	"reflect"
 	"testing"
 
-	"github.com/rcsubra2/burrito/src/environment"
+	"github.com/rcsubra2/burrito/src/mockredis"
 )
 
 func TestNewRedisDB(t *testing.T) {
@@ -20,7 +19,7 @@ func TestNewRedisDB(t *testing.T) {
 		{
 			name: "Create RedisDB",
 			args: args{
-				client:mockredis.NewMockRedisClient(map[string]string{
+				client: mockredis.NewMockRedisClient(map[string]string{
 					"key": "value",
 				}),
 			},
@@ -29,7 +28,6 @@ func TestNewRedisDB(t *testing.T) {
 					"key": "value",
 				}),
 			},
-
 		},
 	}
 	for _, tt := range tests {
@@ -42,15 +40,11 @@ func TestNewRedisDB(t *testing.T) {
 }
 
 func TestRedisDB_Get(t *testing.T) {
-	env := environment.CreateEnv()
-	env.Add(*environment.CreateStringEntry("hello", "goodbye"))
-
 	type fields struct {
 		db RedisDBInterface
 	}
 	type args struct {
-		req  GetReq
-		envs []*environment.Env
+		keys []string
 	}
 	tests := []struct {
 		name   string
@@ -58,62 +52,9 @@ func TestRedisDB_Get(t *testing.T) {
 		args   args
 		want   map[string]string
 	}{
+		// TODO: Add test cases.
 		{
-			name: "GET, field exists",
-			fields: fields{
-				db: mockredis.NewMockRedisClient(map[string]string{
-					"jello": "gorld",
-					"hello": "world",
-				}),
-			},
-			args: args {
-				req: GetReq{
-					ArgNames: []Param {
-						{
-							IsString: true,
-							Val: "jello",
-						},
-						{
-							IsString: true,
-							Val: "hello",
-						},
-					},
-				},
-				envs: []*environment.Env{},
-			},
-			want: map[string]string {
-				"jello": "gorld",
-				"hello": "world",
-			},
-		},
-		{
-			name: "GET, field does not exist",
-			fields: fields{
-				db: mockredis.NewMockRedisClient(map[string]string{
-					"jello": "gorld",
-				}),
-			},
-			args: args {
-				req: GetReq{
-					ArgNames: []Param {
-						{
-							IsString: true,
-							Val: "jello",
-						},
-						{
-							IsString: true,
-							Val: "hello",
-						},
-					},
-				},
-				envs: []*environment.Env{},
-			},
-			want: map[string]string {
-				"jello": "gorld",
-			},
-		},
-		{
-			name: "GET, use environment field",
+			name: "Test get multiple keys, all in db",
 			fields: fields{
 				db: mockredis.NewMockRedisClient(map[string]string{
 					"jello": "gorld",
@@ -121,35 +62,39 @@ func TestRedisDB_Get(t *testing.T) {
 				}),
 			},
 			args: args {
-				req: GetReq{
-					ArgNames: []Param {
-						{
-							IsString: true,
-							Val: "jello",
-						},
-						{
-							IsString: false,
-							Val: "hello",
-						},
-					},
-				},
-				envs: []*environment.Env{env},
+				[]string{"jello", "goodbye"},
 			},
 			want: map[string]string {
 				"jello": "gorld",
 				"goodbye": "world",
 			},
 		},
-
+		{
+			name: "Test get multiple keys, not all in db",
+			fields: fields{
+				db: mockredis.NewMockRedisClient(map[string]string{
+					"jello": "gorld",
+					"hello": "world",
+				}),
+			},
+			args: args {
+				[]string{"jello", "goodbye"},
+			},
+			want: map[string]string {
+				"jello": "gorld",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rc := &RedisDB{
 				db: tt.fields.db,
 			}
-			if got := rc.Get(tt.args.req, tt.args.envs); !reflect.DeepEqual(got, tt.want) {
+			if got := rc.Get(tt.args.keys); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("RedisDB.Get() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
+
+

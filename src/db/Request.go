@@ -6,10 +6,8 @@ import (
 	"strings"
 )
 
-type Req struct {
-	Method string
-	GetReq GetReq
-
+type Req interface {
+	Run(client Database, envs []*environment.Env) map[string]string
 }
 
 type Param struct {
@@ -34,7 +32,7 @@ func (p* Param) GetValue(envs []*environment.Env) (string, bool){
 	return "", false
 }
 
-
+//GetReq - a struct that is an implements Req, and used as structure for get request
 type GetReq struct {
 	ArgNames []Param
 }
@@ -67,3 +65,15 @@ func CreateDBGetReq(argStrs []string) *GetReq {
 	}
 }
 
+// Run - perform the request on given database.
+func (r * GetReq) Run(client Database, envs []*environment.Env) map[string]string {
+	keys := make([]string, len(r.ArgNames))
+	for i, ar := range r.ArgNames {
+		val, ok := ar.GetValue(envs)
+		if ok {
+			keys[i] = val
+		}
+	}
+
+	return client.Get(keys)
+}

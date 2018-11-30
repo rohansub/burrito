@@ -90,18 +90,15 @@ func Test_createResp(t *testing.T) {
 			},
 			want: Resp{
 				RespType: "DB",
-				Body:    db.Req{
-					"GET",
-					db.GetReq{
-						ArgNames: []db.Param{
-							db.Param{
-								false,
-								"varname",
-							},
-							db.Param{
-								true,
-								"hello",
-							},
+				DBReq:    &db.GetReq{
+					ArgNames: []db.Param{
+						db.Param{
+							false,
+							"varname",
+						},
+						db.Param{
+							true,
+							"hello",
 						},
 					},
 				},

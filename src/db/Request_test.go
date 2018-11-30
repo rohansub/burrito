@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/rcsubra2/burrito/src/mockredis"
 	"reflect"
 	"testing"
 
@@ -15,8 +16,6 @@ func TestParam_GetValue(t *testing.T) {
 	env2.Add(*environment.CreateStringEntry("hello", "world2"))
 	env2.Add(*environment.CreateStringEntry("hello2", "world2"))
 
-
-
 	type fields struct {
 		IsString bool
 		Val      string
@@ -29,42 +28,42 @@ func TestParam_GetValue(t *testing.T) {
 		fields fields
 		args   args
 		want   string
-		wantOk  bool
+		wantOk bool
 	}{
 		{
 			name: "Test String",
-			fields: fields {
+			fields: fields{
 				IsString: true,
-				Val: "hello",
+				Val:      "hello",
 			},
-			args: args {
+			args: args{
 				envs: []*environment.Env{env1, env2},
 			},
-			want: "hello",
+			want:   "hello",
 			wantOk: true,
 		},
 		{
 			name: "Test Variable",
-			fields: fields {
+			fields: fields{
 				IsString: false,
-				Val: "hello",
+				Val:      "hello",
 			},
-			args: args {
+			args: args{
 				envs: []*environment.Env{env1, env2},
 			},
-			want: "world",
+			want:   "world",
 			wantOk: true,
 		},
 		{
 			name: "Test Variable Not in entry",
-			fields: fields {
+			fields: fields{
 				IsString: false,
-				Val: "nothere",
+				Val:      "nothere",
 			},
-			args: args {
+			args: args{
 				envs: []*environment.Env{env1, env2},
 			},
-			want: "",
+			want:   "",
 			wantOk: false,
 		},
 	}
@@ -75,7 +74,7 @@ func TestParam_GetValue(t *testing.T) {
 				Val:      tt.fields.Val,
 			}
 			got, ok := p.GetValue(tt.args.envs)
-			if (ok != false) != tt.wantOk  {
+			if (ok != false) != tt.wantOk {
 				t.Errorf("ok = %v want %v", ok, tt.wantOk)
 			}
 			if got != tt.want {
@@ -98,25 +97,25 @@ func TestCreateDBGetReq(t *testing.T) {
 		{
 			name: "Test Get with variables and strings",
 			args: args{
-				argStrs: []string{"'hello'","variable", "var2", "'string'"},
+				argStrs: []string{"'hello'", "variable", "var2", "'string'"},
 			},
 			want: &GetReq{
 				ArgNames: []Param{
 					{
 						IsString: true,
-						Val: "hello",
+						Val:      "hello",
 					},
 					{
 						IsString: false,
-						Val: "variable",
+						Val:      "variable",
 					},
 					{
 						IsString: false,
-						Val: "var2",
+						Val:      "var2",
 					},
 					{
 						IsString: true,
-						Val: "string",
+						Val:      "string",
 					},
 				},
 			},
@@ -126,6 +125,94 @@ func TestCreateDBGetReq(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := CreateDBGetReq(tt.args.argStrs); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CreateDBGetReq() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetReq_Run(t *testing.T) {
+	env := environment.CreateEnv()
+	env.Add(*environment.CreateStringEntry("Maize", "Burrito"))
+
+	type fields struct {
+		ArgNames []Param
+	}
+	type args struct {
+		client Database
+		envs   []*environment.Env
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   map[string]string
+	}{
+		{
+			name: "Test Get request all strings",
+			fields: fields {
+				ArgNames: []Param {
+					{
+						IsString: true,
+						Val: "Veggie",
+					},
+					{
+						IsString: true,
+						Val: "Burrito",
+					},
+				},
+			},
+			args: args{
+				client: NewRedisDB(
+					mockredis.NewMockRedisClient(map[string]string{
+						"Veggie": "great",
+						"Burrito": "food",
+					}),
+				),
+				envs: []*environment.Env{},
+			},
+			want: map[string]string {
+				"Veggie": "great",
+				"Burrito": "food",
+			},
+		},
+		{
+			name: "Test Get request strings and env variables",
+			fields: fields {
+				ArgNames: []Param {
+					{
+						IsString: true,
+						Val: "Veggie",
+					},
+					{
+						IsString: false,
+						Val: "Maize",
+					},
+				},
+			},
+			args: args{
+				client: NewRedisDB(
+					mockredis.NewMockRedisClient(map[string]string{
+						"Veggie": "great",
+						"Burrito": "food",
+					}),
+				),
+				envs: []*environment.Env{
+					env,
+				},
+			},
+			want: map[string]string {
+				"Veggie": "great",
+				"Burrito": "food",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &GetReq{
+				ArgNames: tt.fields.ArgNames,
+			}
+			if got := r.Run(tt.args.client, tt.args.envs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetReq.Run() = %v, want %v", got, tt.want)
 			}
 		})
 	}

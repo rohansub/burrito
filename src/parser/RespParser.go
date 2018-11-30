@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"errors"
+	"github.com/rcsubra2/burrito/src/db"
 	re "regexp"
 )
 
@@ -10,6 +11,7 @@ import (
 type Resp struct {
 	RespType string // FILE or JSON or STR or DB
 	Body     interface{}
+	DBReq    db.Req
 }
 
 // createResp - parse a Resp struct from the string input,
@@ -37,7 +39,7 @@ func createResp(respStr string) (Resp, error) {
 	if isDB != nil {
 		return Resp{
 			RespType: "DB",
-			Body: 	  *isDB,
+			DBReq: 	  isDB,
 		}, nil
 	}
 
