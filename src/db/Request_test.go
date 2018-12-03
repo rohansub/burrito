@@ -439,7 +439,28 @@ func TestCreateDBDelReq(t *testing.T) {
 		args args
 		want *DelReq
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Create Del Request",
+			args: args {
+				argStrs: []string{"'one'", "two", "three"},
+			},
+			want: &DelReq{
+				ArgNames: []Param {
+					{
+						IsString: true,
+						Val: "one",
+					},
+					{
+						IsString: false,
+						Val: "two",
+					},
+					{
+						IsString: false,
+						Val: "three",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -451,6 +472,11 @@ func TestCreateDBDelReq(t *testing.T) {
 }
 
 func TestDelReq_Run(t *testing.T) {
+
+	env := environment.CreateEnv()
+	env.Add(*environment.CreateStringEntry("zesty", "hello"))
+
+
 	type fields struct {
 		ArgNames []Param
 	}
@@ -459,13 +485,91 @@ func TestDelReq_Run(t *testing.T) {
 		group  environment.EnvironmentGroup
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    map[string]string
-		wantErr bool
+		name    	string
+		fields  	fields
+		args    	args
+		want    	map[string]string
+		wantErr 	bool
+		fieldsGet	fields
+		wantGet 	map[string]string
+		wantGetErr 	bool
 	}{
-		// TODO: add test cases
+		{
+			name: "Delete string keys",
+			fields: fields {
+				ArgNames: []Param{
+					{
+						IsString: true,
+						Val: "zesty",
+					},
+					{
+						IsString: true,
+						Val: "burrito",
+					},
+				},
+			},
+			args: args{
+				client: NewRedisDB(mockredis.NewMockRedisClient(map[string]string{
+					"zesty": "one",
+					"burrito": "one",
+				})),
+				group: *environment.CreateEnvironmentGroup(nil, nil, nil),
+			},
+			fieldsGet: fields {
+				ArgNames: []Param{
+					{
+						IsString: true,
+						Val: "zesty",
+					},
+					{
+						IsString: true,
+						Val: "burrito",
+					},
+				},
+			},
+			want: map[string]string{},
+			wantErr: false,
+			wantGet: map[string]string{},
+			wantGetErr: false,
+
+		},
+		{
+			name: "Delete string and variable keys",
+			fields: fields {
+				ArgNames: []Param{
+					{
+						IsString: false,
+						Val: "zesty",
+					},
+
+				},
+			},
+			args: args{
+				client: NewRedisDB(mockredis.NewMockRedisClient(map[string]string{
+					"hello": "one",
+					"burrito": "one",
+				})),
+				group: *environment.CreateEnvironmentGroup(nil, nil, nil),
+			},
+			fieldsGet: fields {
+				ArgNames: []Param{
+					{
+						IsString: false,
+						Val: "zesty",
+					},
+					{
+						IsString: true,
+						Val: "burrito",
+					},
+				},
+			},
+			want: map[string]string{},
+			wantErr: false,
+			wantGet: map[string]string{
+				"burrito":"one",
+			},
+			wantGetErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -480,6 +584,20 @@ func TestDelReq_Run(t *testing.T) {
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DelReq.Run() = %v, want %v", got, tt.want)
 			}
+
+			rGet := &GetReq{
+				ArgNames: tt.fieldsGet.ArgNames,
+			}
+			got2, err := rGet.Run(tt.args.client, tt.args.group)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Get after Del: GetReq.Run() error = %v, wantErr %v", err, tt.wantGetErr)
+				return
+			}
+			if !reflect.DeepEqual(got2, tt.wantGet) {
+				t.Errorf("Get after Del: GetReq.Run() = %v, want %v", got2, tt.wantGet)
+			}
+
+
 		})
 	}
 }

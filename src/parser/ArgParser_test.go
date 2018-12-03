@@ -15,7 +15,6 @@ func Test_createArg(t *testing.T) {
 		want    Arg
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "Too many arguments",
 			args: args{

@@ -18,7 +18,7 @@ func Test_createRespForDB(t *testing.T) {
 		want db.Req
 	}{
 		{
-			name: "Test Strings",
+			name: "Test DB.GET Strings",
 			args: args {
 				"DB.GET('hello','world',)",
 			},
@@ -37,7 +37,7 @@ func Test_createRespForDB(t *testing.T) {
 
 		},
 		{
-			name: "Test Variables",
+			name: "Test DB.GET Variables",
 			args: args {
 				"DB.GET(zesty, burrito,)",
 			},
@@ -56,7 +56,7 @@ func Test_createRespForDB(t *testing.T) {
 
 		},
 		{
-			name: "Test Variables an strings",
+			name: "Test DB.GET Variables and strings",
 			args: args {
 				"DB.GET(zesty, 'burrito', tomorrow,)",
 			},
@@ -79,7 +79,7 @@ func Test_createRespForDB(t *testing.T) {
 			},
 		},
 		{
-			name: "Test SET",
+			name: "Test DB.SET",
 			args: args {
 				"DB.SET((zesty,'burrito'), ('zesty2',burrito2),)",
 			},
@@ -105,6 +105,29 @@ func Test_createRespForDB(t *testing.T) {
 							Val: "burrito2",
 						},
 					},
+				},
+			},
+		},
+		{
+			name: "Test DB.DEL Variables and strings",
+			args: args {
+				"DB.DEL(zesty, 'burrito', tomorrow,)",
+			},
+			want: &db.DelReq{
+				ArgNames: []db.Param{
+					{
+						IsString: false,
+						Val: "zesty",
+					},
+					{
+						IsString: true,
+						Val: "burrito",
+					},
+					{
+						IsString: false,
+						Val: "tomorrow",
+					},
+
 				},
 			},
 		},

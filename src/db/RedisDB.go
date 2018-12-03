@@ -46,7 +46,7 @@ func (rc * RedisDB) Set(items []utils.Pair) bool {
 func (rc *RedisDB) Delete(keys []string) bool {
 	// TODO: Return list of successfully deleted items
 	_, err := rc.db.Del(keys...).Result()
-	if err == nil {
+	if err != nil {
 		return false
 	}
 	return true
