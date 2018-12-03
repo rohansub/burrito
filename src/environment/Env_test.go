@@ -229,81 +229,6 @@ func TestCreateStringEntry(t *testing.T) {
 	}
 }
 
-func TestCreateBurritoTemplateData(t *testing.T) {
-	type args struct {
-		urlEnv  *Env
-		respEnv *Env
-	}
-	tests := []struct {
-		name string
-		args args
-		want BurritoTemplateData
-	}{
-		{
-			name: "Create Empty Burrito Template",
-			args: args{
-				urlEnv: &Env{
-					map[string]EnvEntry{},
-				},
-				respEnv: &Env{
-					map[string]EnvEntry{},
-				},
-			},
-			want: BurritoTemplateData{
-				Url: (&Env{
-					map[string]EnvEntry{},
-				}).Data(),
-				Data: (&Env{
-					map[string]EnvEntry{},
-				}).Data(),
-			},
-		},
-		{
-			name: "Create Burrito Template - contains data",
-			args: args{
-				urlEnv: &Env{
-					map[string]EnvEntry{
-						"hello": *CreateIntEntry("hello", 1),
-						"zesty": *CreateStringEntry("zesty", "burrito"),
-						"siesta": *CreateFloatEntry("siesta", 999.9),
-					},
-				},
-				respEnv: &Env{
-					map[string]EnvEntry{
-						"rhello": *CreateIntEntry("rhello", 1),
-						"rzesty": *CreateStringEntry("rzesty", "burrito"),
-						"rsiesta": *CreateFloatEntry("rsiesta", 999.9),
-					},
-				},
-			},
-			want: BurritoTemplateData{
-				Url: (&Env{
-					map[string]EnvEntry{
-						"hello": *CreateIntEntry("hello", 1),
-						"zesty": *CreateStringEntry("zesty", "burrito"),
-						"siesta": *CreateFloatEntry("siesta", 999.9),
-					},
-				}).Data(),
-				Data: (&Env{
-					map[string]EnvEntry{
-						"rhello": *CreateIntEntry("rhello", 1),
-						"rzesty": *CreateStringEntry("rzesty", "burrito"),
-						"rsiesta": *CreateFloatEntry("rsiesta", 999.9),
-					},
-				}).Data(),
-			},
-		},
-
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := CreateBurritoTemplateData(tt.args.urlEnv, tt.args.respEnv); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CreateBurritoTemplateData() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestEnv_GetValue(t *testing.T) {
 	type fields struct {
 		data map[string]EnvEntry
@@ -319,7 +244,7 @@ func TestEnv_GetValue(t *testing.T) {
 	}{
 		{
 			name: "Get Value int",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"key": *CreateIntEntry("key", 4),
 				},
@@ -329,7 +254,7 @@ func TestEnv_GetValue(t *testing.T) {
 		},
 		{
 			name: "Get Value str",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"key": *CreateStringEntry("key", "hello"),
 				},
@@ -339,7 +264,7 @@ func TestEnv_GetValue(t *testing.T) {
 		},
 		{
 			name: "Get Value float",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"key": *CreateFloatEntry("key", 4.2),
 				},
@@ -349,7 +274,7 @@ func TestEnv_GetValue(t *testing.T) {
 		},
 		{
 			name: "Key not in Env",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
 					"key": *CreateFloatEntry("key", 4.2),
 				},
@@ -381,16 +306,16 @@ func TestEnv_Data(t *testing.T) {
 	}{
 		{
 			name: "Extract data values",
-			fields: fields {
+			fields: fields{
 				data: map[string]EnvEntry{
-					"i": *CreateIntEntry("i", 1),
-					"f": *CreateFloatEntry("f", 1.2),
+					"i":  *CreateIntEntry("i", 1),
+					"f":  *CreateFloatEntry("f", 1.2),
 					"st": *CreateStringEntry("st", "GG"),
 				},
 			},
 			want: map[string]interface{}{
-				"i": int64(1),
-				"f": 1.2,
+				"i":  int64(1),
+				"f":  1.2,
 				"st": "GG",
 			},
 		},
@@ -402,6 +327,115 @@ func TestEnv_Data(t *testing.T) {
 			}
 			if got := e.Data(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Env.Dump() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnvironmentGroup_GetValue(t *testing.T) {
+
+	env1 := CreateEnv()
+	env2 := CreateEnv()
+	env3 := CreateEnv()
+
+	env1.Add(*CreateStringEntry("hello", "world"))
+	env2.Add(*CreateStringEntry("hello", "chocolate"))
+	env3.Add(*CreateStringEntry("hello", "burrito"))
+
+	type fields struct {
+		Url  *Env
+		Form *Env
+		Resp *Env
+	}
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   interface{}
+	}{
+		{
+			name: "Test Url Env only",
+			fields: fields {
+				Url: env1,
+				Form: nil,
+				Resp: nil,
+			},
+			args: args {
+				"hello",
+			},
+			want: "world",
+		},
+		{
+			name: "Test Url and From envs",
+			fields: fields {
+				Url: env1,
+				Form: env2,
+				Resp: nil,
+			},
+			args: args {
+				"hello",
+			},
+			want: "chocolate",
+		},
+		{
+			name: "Test Url, From and Resp env",
+			fields: fields {
+				Url: env1,
+				Form: env2,
+				Resp: env3,
+			},
+			args: args {
+				"hello",
+			},
+			want: "burrito",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			eg := &EnvironmentGroup{
+				Url:  tt.fields.Url,
+				Form: tt.fields.Form,
+				Resp: tt.fields.Resp,
+			}
+			if got := eg.GetValue(tt.args.key); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("EnvironmentGroup.GetValue() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCreateEnvironmentGroup(t *testing.T) {
+	type args struct {
+		url  *Env
+		form *Env
+		resp *Env
+	}
+	tests := []struct {
+		name string
+		args args
+		want *EnvironmentGroup
+	}{
+		{
+			name: "Test Create Environment Group",
+			args: args {
+				url: CreateEnv(),
+				form: CreateEnv(),
+				resp: CreateEnv(),
+			},
+			want: &EnvironmentGroup{
+				Url: CreateEnv(),
+				Form: CreateEnv(),
+				Resp: CreateEnv(),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CreateEnvironmentGroup(tt.args.url, tt.args.form, tt.args.resp); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CreateEnvironmentGroup() = %v, want %v", got, tt.want)
 			}
 		})
 	}

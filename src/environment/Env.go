@@ -98,15 +98,6 @@ type BurritoTemplateData struct {
 }
 
 
-func CreateBurritoTemplateData(urlEnv * Env, respEnv * Env) BurritoTemplateData{
-	t := BurritoTemplateData{}
-
-	t.Url = urlEnv.Data()
-	t.Data = respEnv.Data()
-	return t
-}
-
-
 // EnvironmentGroup - Group of environment structures used when a request is parsed
 type EnvironmentGroup struct {
 	Url	*Env
@@ -126,19 +117,26 @@ func CreateEnvironmentGroup(url *Env, form *Env, resp *Env) *EnvironmentGroup{
 
 // GetValue - get value specified in an environment group
 func (eg * EnvironmentGroup) GetValue(key string) interface{}{
-	inResp := eg.Url.GetValue(key)
-	if inResp != nil {
-		return inResp
+
+	if eg.Resp != nil {
+		inResp := eg.Resp.GetValue(key)
+		if inResp != nil {
+			return inResp
+		}
 	}
 
-	inForm := eg.Url.GetValue(key)
-	if inForm != nil {
-		return inForm
+	if eg.Form != nil {
+		inForm := eg.Form.GetValue(key)
+		if inForm != nil {
+			return inForm
+		}
 	}
 
-	inUrl := eg.Url.GetValue(key)
-	if inUrl != nil {
-		return inUrl
+	if eg.Url != nil {
+		inUrl := eg.Url.GetValue(key)
+		if inUrl != nil {
+			return inUrl
+		}
 	}
 
 	return nil
