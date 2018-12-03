@@ -1,5 +1,9 @@
 package db
 
+import (
+	"github.com/rcsubra2/burrito/src/utils"
+)
+
 // RedisDB - A client that interacts with Redis data
 type RedisDB struct {
 	db   RedisDBInterface
@@ -7,14 +11,12 @@ type RedisDB struct {
 
 // NewRedisDB - create RedisDB client, given uri
 func NewRedisDB(client RedisDBInterface) *RedisDB {
-
 	return &RedisDB{
 		db: client,
 	}
-
 }
 
-// Get - Perform GetReq req given a list of environments
+// Get - Perform get on redis database given a list of strings
 func (rc *RedisDB) Get(keys []string) map[string]string {
 	respData := make(map[string]string)
 	// Extract a value for each key, add it to respData
@@ -26,4 +28,15 @@ func (rc *RedisDB) Get(keys []string) map[string]string {
 	}
 	return respData
 
+}
+
+// Set - Perform set on redis database given a list of pairs
+func (rc * RedisDB) Set(items []utils.Pair) bool {
+	for _, kv := range items {
+		_, err := rc.db.Set(kv.Fst.(string), kv.Snd,0).Result()
+		if err != nil {
+			return false
+		}
+	}
+	return true
 }

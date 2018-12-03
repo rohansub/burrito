@@ -5,6 +5,7 @@ import (
 	"testing"
 	"errors"
 	"github.com/go-redis/redis"
+	"time"
 )
 
 func TestNewMockRedisClient(t *testing.T) {
@@ -97,7 +98,8 @@ func TestClient_Set(t *testing.T) {
 	}
 	type args struct {
 		key   string
-		value string
+		value interface{}
+		t	  time.Duration
 	}
 	tests := []struct {
 		name   string
@@ -113,6 +115,7 @@ func TestClient_Set(t *testing.T) {
 			args: args {
 				key: "key",
 				value: "val",
+				t: 0,
 			},
 			wantFields: fields {
 				map[string]string{
@@ -130,6 +133,7 @@ func TestClient_Set(t *testing.T) {
 			args: args {
 				key: "key",
 				value: "val2",
+				t: 0,
 			},
 			wantFields: fields {
 				map[string]string{
@@ -143,7 +147,7 @@ func TestClient_Set(t *testing.T) {
 			c := &Client{
 				data: tt.fields.data,
 			}
-			c.Set(tt.args.key, tt.args.value)
+			c.Set(tt.args.key, tt.args.value, tt.args.t)
 			if !reflect.DeepEqual(c.data, tt.wantFields.data) {
 				t.Errorf("c.data = %v, want %v", c.data, tt.wantFields.data)
 			}

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/rcsubra2/burrito/src/utils"
 	"reflect"
 	"testing"
 
@@ -83,7 +84,7 @@ func Test_createRespForDB(t *testing.T) {
 				"DB.SET((zesty,'burrito'), ('zesty2',burrito2),)",
 			},
 			want: &db.SetReq{
-				ArgNames: []db.Pair{
+				ArgNames: []utils.Pair{
 					{
 						Fst: db.Param {
 							IsString: false,

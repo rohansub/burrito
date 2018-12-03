@@ -1,13 +1,16 @@
 package db
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rcsubra2/burrito/src/environment"
+	"github.com/rcsubra2/burrito/src/utils"
 	re "regexp"
 	"strings"
 )
 
 type Req interface {
-	Run(client Database, envs []*environment.Env) map[string]string
+	Run(client Database, envs []*environment.Env) (map[string]string, error)
 }
 
 type Param struct {
@@ -51,7 +54,7 @@ func CreateDBGetReq(argStrs []string) *GetReq {
 }
 
 // Run - perform the request on given database.
-func (r * GetReq) Run(client Database, envs []*environment.Env) map[string]string {
+func (r * GetReq) Run(client Database, envs []*environment.Env) (map[string]string, error) {
 	keys := make([]string, len(r.ArgNames))
 	for i, ar := range r.ArgNames {
 		val, ok := ar.GetValue(envs)
@@ -59,29 +62,23 @@ func (r * GetReq) Run(client Database, envs []*environment.Env) map[string]strin
 			keys[i] = val
 		}
 	}
-
-	return client.Get(keys)
-}
-
-type Pair struct {
-	Fst Param
-	Snd Param
+	return client.Get(keys), nil
 }
 
 
 type SetReq struct {
-	ArgNames []Pair
+	ArgNames []utils.Pair
 }
 
-// CreateDBGetReq - creates database get request given a list of string arguments
+// CreateDBSetReq - creates database get request given a list of string arguments
 func CreateDBSetReq(argStrs []string) *SetReq {
-	args := make([]Pair, 0)
+	args := make([]utils.Pair, 0)
 	for _, s := range argStrs {
 		stripped := strings.Trim(s, " ")
 		rePair := re.MustCompile(`\(\s*(.*)\s*,\s*(.*)\s*\)`)
 		if rePair.MatchString(stripped){
 			matches := rePair.FindStringSubmatch(stripped)
-			p := Pair {
+			p := utils.Pair {
 				Fst: extractParam(matches[1]),
 				Snd: extractParam(matches[2]),
 			}
@@ -98,12 +95,36 @@ func CreateDBSetReq(argStrs []string) *SetReq {
 	}
 }
 
-func (req * SetReq) Run(client Database, envs []*environment.Env) map[string]string {
-	return nil
+func (req * SetReq) Run(client Database, envs []*environment.Env) (map[string]string, error) {
+	pairs := make([]utils.Pair, len(req.ArgNames))
+	for i, ar := range req.ArgNames {
+		kParam := ar.Fst.(Param)
+		vParam := ar.Snd.(Param)
+
+		k, okKey := kParam.GetValue(envs)
+		v, okVal := vParam.GetValue(envs)
+
+		if okKey && okVal {
+			pairs[i] = utils.Pair{
+				Fst: k,
+				Snd: v,
+			}
+		} else {
+			m := fmt.Sprintf("No such variable %s in environment", ar.Snd)
+			return map[string]string{}, errors.New(m)
+		}
+	}
+	v := client.Set(pairs)
+	if v {
+		return map[string]string{}, nil
+	} else {
+		return map[string]string{}, errors.New("DB call failed")
+	}
+
 }
 
 
-func extractParam(strParam string) Param{
+func extractParam(strParam string) Param {
 	strRE := re.MustCompile(`^'(\w*)'$`)
 	if strRE.MatchString(strParam) {
 		matches := strRE.FindStringSubmatch(strParam)

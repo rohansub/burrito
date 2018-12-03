@@ -47,7 +47,7 @@ func NewBurritoServer(
 }
 
 func (bs *BurritoServer) queryDB(res parser.Resp, urlEnv *environment.Env, respEnv *environment.Env) {
-	data := res.DBReq.Run(bs.client, []*environment.Env{respEnv, urlEnv})
+	data, _ := res.DBReq.Run(bs.client, []*environment.Env{respEnv, urlEnv})
 	for k, v := range data {
 		entry := *environment.CreateStringEntry(k, v)
 		respEnv.Add(entry)
@@ -106,7 +106,6 @@ func (bs *BurritoServer) renderChain(
 			break
 		}
 	}
-	// TODO: check if no response was sent back, if so send back the respEnv as JSON
 	if chainContinue {
 		WriteJson(w, respEnv.Data())
 	}

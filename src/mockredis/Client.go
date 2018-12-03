@@ -3,6 +3,7 @@ package mockredis
 import (
 	"github.com/go-redis/redis"
 	"errors"
+	"time"
 )
 
 type Client struct {
@@ -27,7 +28,8 @@ func (c * Client) Get(key string) *redis.StringCmd {
 }
 
 
-func (c * Client) Set(key string, value string) {
-	c.data[key] = value
+func (c * Client) Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd {
+	c.data[key] = value.(string)
+	return redis.NewStatusCmd()
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/rcsubra2/burrito/src/db"
 	"github.com/rcsubra2/burrito/src/parser"
+	"github.com/rcsubra2/burrito/src/utils"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -306,6 +307,188 @@ func TestBurritoServer_Run(t *testing.T) {
 					want: map[string]interface{} {
 						"hello":"burrito",
 					},
+				},
+
+			},
+		},
+		{
+			name: "SET Redis data, single item",
+			fields: fields{
+				Routes: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/:zesty": {
+							"PUT": []parser.Resp{
+								{
+									RespType: "DB",
+									DBReq:   &db.SetReq{
+										ArgNames: []utils.Pair{
+											{
+												Fst: db.Param{
+													IsString: false,
+													Val: "zesty",
+												},
+												Snd: db.Param{
+													IsString: true,
+													Val: "quesadilla",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				MockInit: map[string]string{
+					"hello": "burrito",
+				},
+			},
+			args: []arg{
+				{
+					method: "PUT",
+					uri: "/hello",
+					wantType: "app/json",
+					want: map[string]interface{} {},
+				},
+
+			},
+		},
+		{
+			name: "SET chained with Get Redis data, multiple items",
+			fields: fields{
+				Routes: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/:zesty": {
+							"PUT": []parser.Resp{
+								{
+									RespType: "DB",
+									DBReq:   &db.SetReq{
+										ArgNames: []utils.Pair{
+											{
+												Fst: db.Param{
+													IsString: false,
+													Val: "zesty",
+												},
+												Snd: db.Param{
+													IsString: true,
+													Val: "quesadilla",
+												},
+											},
+											{
+												Fst: db.Param{
+													IsString: true,
+													Val: "burrito",
+												},
+												Snd: db.Param{
+													IsString: true,
+													Val: "supreme",
+												},
+											},
+										},
+									},
+								},
+								{
+									RespType: "DB",
+									DBReq:   &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: false,
+												Val: "zesty",
+											},
+											{
+												IsString: true,
+												Val: "burrito",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				MockInit: map[string]string{
+					"hello": "different",
+					"burrito": "notsame",
+				},
+			},
+			args: []arg{
+				{
+					method: "PUT",
+					uri: "/hello",
+					wantType: "app/json",
+					want: map[string]interface{} {
+						"hello": "quesadilla",
+						"burrito": "supreme",
+					},
+				},
+
+			},
+		},
+		{
+			name: "GET Redis, chained with SET Redis, chained with html",
+			fields: fields{
+				Routes: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/:name": {
+							"PUT": []parser.Resp{
+								{
+									RespType: "DB",
+									DBReq:   &db.SetReq{
+										ArgNames: []utils.Pair{
+											{
+												Fst: db.Param{
+													IsString: true,
+													Val: "name",
+												},
+												Snd: db.Param{
+													IsString: false,
+													Val: "name",
+												},
+											},
+											{
+												Fst: db.Param{
+													IsString: true,
+													Val: "greeting",
+												},
+												Snd: db.Param{
+													IsString: true,
+													Val: "hello",
+												},
+											},
+										},
+									},
+								},
+								{
+									RespType: "DB",
+									DBReq:   &db.GetReq{
+										ArgNames: []db.Param{
+											{
+												IsString: true,
+												Val: "name",
+											},
+											{
+												IsString: true,
+												Val: "greeting",
+											},
+										},
+									},
+								},
+								{
+									RespType: "STR",
+									Body:     "../../test_html/template.html",
+								},
+							},
+						},
+					},
+				},
+				MockInit: map[string]string{},
+			},
+			args: []arg{
+				{
+					method: "PUT",
+					uri: "/rohan",
+					wantType: "text/html",
+					want: "<h>rohan</h>\n<h>rohan</h>\n<h>hello</h>",
 				},
 
 			},
