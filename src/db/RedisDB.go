@@ -32,6 +32,7 @@ func (rc *RedisDB) Get(keys []string) map[string]string {
 
 // Set - Perform set on redis database given a list of pairs
 func (rc * RedisDB) Set(items []utils.Pair) bool {
+	// TODO: Return Items that were successfully set
 	for _, kv := range items {
 		_, err := rc.db.Set(kv.Fst.(string), kv.Snd,0).Result()
 		if err != nil {
@@ -43,7 +44,12 @@ func (rc * RedisDB) Set(items []utils.Pair) bool {
 
 
 func (rc *RedisDB) Delete(keys []string) bool {
-	return false
+	// TODO: Return list of successfully deleted items
+	_, err := rc.db.Del(keys...).Result()
+	if err == nil {
+		return false
+	}
+	return true
 
 }
 

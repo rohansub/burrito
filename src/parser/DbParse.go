@@ -28,6 +28,14 @@ func createRespForDB(respStr string) db.Req {
 		return gr
 	}
 
+	isDel := re.MustCompile(`^DB.DEL\(((?:(?:\w+|(?:'\w*'))\s*,\s*)*)\)$`)
+	if isDel.MatchString(respStr) {
+		matches := isDel.FindStringSubmatch(respStr)
+		argStrs := strings.Split(matches[1], ",")
+		gr := db.CreateDBDelReq(argStrs[0:len(argStrs)-1])
+		return gr
+	}
+
 	return nil
 }
 

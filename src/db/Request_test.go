@@ -276,7 +276,6 @@ func TestSetReq_Run(t *testing.T) {
 	env.Add(*environment.CreateStringEntry("variable", "world"))
 	env.Add(*environment.CreateStringEntry("var2", "ThisIs"))
 
-
 	type fields struct {
 		ArgNames []utils.Pair
 	}
@@ -288,18 +287,18 @@ func TestSetReq_Run(t *testing.T) {
 		ArgNames []Param
 	}
 	tests := []struct {
-		name    	string
-		fields  	fields
-		args    	args
-		want    	map[string]string
-		wantErr 	bool
-		getFields 	getFields
-		wantGet  	map[string] string
-		wantGetErr 	bool
+		name       string
+		fields     fields
+		args       args
+		want       map[string]string
+		wantErr    bool
+		getFields  getFields
+		wantGet    map[string]string
+		wantGetErr bool
 	}{
 		{
 			name: "Test Set request Run - strings only",
-			fields: fields {
+			fields: fields{
 				ArgNames: []utils.Pair{
 					{
 						Fst: Param{
@@ -323,13 +322,13 @@ func TestSetReq_Run(t *testing.T) {
 					},
 				},
 			},
-			args: args {
+			args: args{
 				client: NewRedisDB(
 					mockredis.NewMockRedisClient(map[string]string{}),
 				),
 				envs: *environment.CreateEnvironmentGroup(nil, nil, nil),
 			},
-			want: map[string]string{},
+			want:    map[string]string{},
 			wantErr: false,
 			getFields: getFields{
 				ArgNames: []Param{
@@ -343,15 +342,15 @@ func TestSetReq_Run(t *testing.T) {
 					},
 				},
 			},
-			wantGet: map[string]string {
+			wantGet: map[string]string{
 				"hello": "variable",
-				"var2": "string",
+				"var2":  "string",
 			},
 			wantGetErr: false,
 		},
 		{
 			name: "Test Set request Run - strings and variables",
-			fields: fields {
+			fields: fields{
 				ArgNames: []utils.Pair{
 					{
 						Fst: Param{
@@ -375,13 +374,13 @@ func TestSetReq_Run(t *testing.T) {
 					},
 				},
 			},
-			args: args {
+			args: args{
 				client: NewRedisDB(
 					mockredis.NewMockRedisClient(map[string]string{}),
 				),
 				envs: *environment.CreateEnvironmentGroup(env, nil, nil),
 			},
-			want: map[string]string{},
+			want:    map[string]string{},
 			wantErr: false,
 			getFields: getFields{
 				ArgNames: []Param{
@@ -395,8 +394,8 @@ func TestSetReq_Run(t *testing.T) {
 					},
 				},
 			},
-			wantGet: map[string]string {
-				"hello": "world",
+			wantGet: map[string]string{
+				"hello":  "world",
 				"ThisIs": "string",
 			},
 			wantGetErr: false,
@@ -426,6 +425,60 @@ func TestSetReq_Run(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got2, tt.wantGet) {
 				t.Errorf("Get after Set failed: GetReq.Run() = %v, want %v", got2, tt.wantGet)
+			}
+		})
+	}
+}
+
+func TestCreateDBDelReq(t *testing.T) {
+	type args struct {
+		argStrs []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *DelReq
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CreateDBDelReq(tt.args.argStrs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CreateDBDelReq() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDelReq_Run(t *testing.T) {
+	type fields struct {
+		ArgNames []Param
+	}
+	type args struct {
+		client Database
+		group  environment.EnvironmentGroup
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    map[string]string
+		wantErr bool
+	}{
+		// TODO: add test cases
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &DelReq{
+				ArgNames: tt.fields.ArgNames,
+			}
+			got, err := r.Run(tt.args.client, tt.args.group)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DelReq.Run() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("DelReq.Run() = %v, want %v", got, tt.want)
 			}
 		})
 	}

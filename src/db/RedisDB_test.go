@@ -57,15 +57,15 @@ func TestRedisDB_Get(t *testing.T) {
 			name: "Test get multiple keys, all in db",
 			fields: fields{
 				db: mockredis.NewMockRedisClient(map[string]string{
-					"jello": "gorld",
+					"jello":   "gorld",
 					"goodbye": "world",
 				}),
 			},
-			args: args {
+			args: args{
 				[]string{"jello", "goodbye"},
 			},
-			want: map[string]string {
-				"jello": "gorld",
+			want: map[string]string{
+				"jello":   "gorld",
 				"goodbye": "world",
 			},
 		},
@@ -77,10 +77,10 @@ func TestRedisDB_Get(t *testing.T) {
 					"hello": "world",
 				}),
 			},
-			args: args {
+			args: args{
 				[]string{"jello", "goodbye"},
 			},
-			want: map[string]string {
+			want: map[string]string{
 				"jello": "gorld",
 			},
 		},
@@ -97,4 +97,29 @@ func TestRedisDB_Get(t *testing.T) {
 	}
 }
 
-
+func TestRedisDB_Delete(t *testing.T) {
+	type fields struct {
+		db RedisDBInterface
+	}
+	type args struct {
+		keys []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rc := &RedisDB{
+				db: tt.fields.db,
+			}
+			if got := rc.Delete(tt.args.keys); got != tt.want {
+				t.Errorf("RedisDB.Delete() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

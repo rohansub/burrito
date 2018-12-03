@@ -117,10 +117,47 @@ func (req * SetReq) Run(client Database, group environment.EnvironmentGroup) (ma
 	if v {
 		return map[string]string{}, nil
 	} else {
-		return map[string]string{}, errors.New("DB call failed")
+		return map[string]string{}, errors.New("Failed to Set!")
 	}
 
 }
+
+
+//GetReq - a struct that is an implements Req, and used as structure for get request
+type DelReq struct {
+	ArgNames []Param
+}
+
+// CreateDBDelReq - creates database del request given a list of string arguments
+func CreateDBDelReq(argStrs []string) *DelReq {
+	// TODO: Refactor this, make GET and DEL rely on same functions.
+	args := make([]Param, len(argStrs))
+	for i, s := range argStrs {
+		stripped := strings.Trim(s, " ")
+		var arg Param = extractParam(stripped)
+		args[i] = arg
+	}
+	return &DelReq{
+		ArgNames: args,
+	}
+}
+
+// Run - perform the request on given database.
+func (r * DelReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
+	keys := make([]string, len(r.ArgNames))
+	for i, ar := range r.ArgNames {
+		val, ok := ar.GetValue(group)
+		if ok {
+			keys[i] = val
+		}
+	}
+	ok := client.Delete(keys)
+	if !ok {
+		return map[string]string{}, errors.New("Failed to Delete!")
+	}
+	return map[string]string{}, nil
+}
+
 
 
 func extractParam(strParam string) Param {

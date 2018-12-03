@@ -34,5 +34,13 @@ func (c * Client) Set(key string, value interface{}, expiration time.Duration) *
 }
 
 func (c* Client) Del(keys ...string) *redis.IntCmd {
-	return nil
+	val := 0
+	for _, k := range keys {
+		_, ok := c.data[k]
+		if ok {
+			delete(c.data, k)
+			val += 1
+		}
+	}
+	return redis.NewIntCmd(val)
 }
