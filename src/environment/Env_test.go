@@ -401,7 +401,7 @@ func TestEnv_Data(t *testing.T) {
 				data: tt.fields.data,
 			}
 			if got := e.Data(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Env.Data() = %v, want %v", got, tt.want)
+				t.Errorf("Env.Dump() = %v, want %v", got, tt.want)
 			}
 		})
 	}

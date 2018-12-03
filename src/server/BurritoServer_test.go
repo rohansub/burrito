@@ -80,7 +80,7 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "Standard Server String data Generics",
+			name: "Serve Template data, given url variables",
 			fields: fields{
 				Routes: &parser.ParsedRoutes{
 					Routes: map[string]map[string][]parser.Resp{
@@ -474,8 +474,8 @@ func TestBurritoServer_Run(t *testing.T) {
 									},
 								},
 								{
-									RespType: "STR",
-									Body:     "../../test_html/template.html",
+									RespType: "FILE",
+									Body:     "../../test_html/user.html",
 								},
 							},
 						},
@@ -492,6 +492,46 @@ func TestBurritoServer_Run(t *testing.T) {
 				},
 
 			},
+		},
+		{
+			name: "Serve Template data, given form data",
+			fields: fields{
+				Routes: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/": {
+							"GET": []parser.Resp{
+								parser.Resp{
+									RespType: "FILE",
+									Body:     "../../test_html/hello.html",
+								},
+							},
+						},
+						"/zesty": {
+							"GET": []parser.Resp{
+								parser.Resp{
+									RespType: "FILE",
+									Body:     "../../test_html/template2.html",
+								},
+							},
+						},
+					},
+				},
+			},
+			args: []arg{
+				{
+					method: "GET",
+					uri: "/",
+					want: "<p>Hello</p>",
+					wantType: "text/html",
+				},
+				{
+					method: "GET",
+					uri: "/zesty?burrito=fool",
+					want: "<h>fool</h>",
+					wantType: "text/html",
+				},
+			},
+
 		},
 	}
 	for _, tt := range tests {
@@ -513,7 +553,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				if p, err := ioutil.ReadAll(resp.Body); err != nil {
 					t.Fail()
 				} else {
-					if ar.wantType == "html/text" && !reflect.DeepEqual(string(p),ar.want) {
+					if ar.wantType == "text/html" && !reflect.DeepEqual(string(p),ar.want) {
 						t.Errorf("Wanted %s - Got %s", ar.want, p)
 					} else if ar.wantType == "app/json" {
 						var d interface{}
@@ -526,9 +566,7 @@ func TestBurritoServer_Run(t *testing.T) {
 					}
 				}
 			}
-
-
-
 		})
+
 	}
 }

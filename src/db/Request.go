@@ -10,7 +10,7 @@ import (
 )
 
 type Req interface {
-	Run(client Database, envs []*environment.Env) (map[string]string, error)
+	Run(client Database, group environment.EnvironmentGroup) (map[string]string, error)
 }
 
 type Param struct {
@@ -19,17 +19,16 @@ type Param struct {
 }
 
 // GetValue - given a list of environments find the value of the parameter
-func (p* Param) GetValue(envs []*environment.Env) (string, bool){
+func (p* Param) GetValue(group environment.EnvironmentGroup) (string, bool){
 	if p.IsString {
 		return p.Val, true
 	}
-	for _, e := range envs {
-		entry := e.GetValue(p.Val)
-		if entry != nil {
-			v, ok := entry.(string)
-			if ok {
-				return v, true
-			}
+
+	entry := group.GetValue(p.Val)
+	if entry != nil {
+		v, ok := entry.(string)
+		if ok {
+			return v, true
 		}
 	}
 	return "", false
@@ -54,10 +53,10 @@ func CreateDBGetReq(argStrs []string) *GetReq {
 }
 
 // Run - perform the request on given database.
-func (r * GetReq) Run(client Database, envs []*environment.Env) (map[string]string, error) {
+func (r * GetReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
 	keys := make([]string, len(r.ArgNames))
 	for i, ar := range r.ArgNames {
-		val, ok := ar.GetValue(envs)
+		val, ok := ar.GetValue(group)
 		if ok {
 			keys[i] = val
 		}
@@ -95,14 +94,14 @@ func CreateDBSetReq(argStrs []string) *SetReq {
 	}
 }
 
-func (req * SetReq) Run(client Database, envs []*environment.Env) (map[string]string, error) {
+func (req * SetReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
 	pairs := make([]utils.Pair, len(req.ArgNames))
 	for i, ar := range req.ArgNames {
 		kParam := ar.Fst.(Param)
 		vParam := ar.Snd.(Param)
 
-		k, okKey := kParam.GetValue(envs)
-		v, okVal := vParam.GetValue(envs)
+		k, okKey := kParam.GetValue(group)
+		v, okVal := vParam.GetValue(group)
 
 		if okKey && okVal {
 			pairs[i] = utils.Pair{

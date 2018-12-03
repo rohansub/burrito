@@ -40,3 +40,11 @@ func (rc * RedisDB) Set(items []utils.Pair) bool {
 	}
 	return true
 }
+
+
+func (rc *RedisDB) Delete(keys []string) bool {
+	return false
+
+}
+
+

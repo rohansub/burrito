@@ -33,3 +33,6 @@ func (c * Client) Set(key string, value interface{}, expiration time.Duration) *
 	return redis.NewStatusCmd()
 }
 
+func (c* Client) Del(keys ...string) *redis.IntCmd {
+	return nil
+}

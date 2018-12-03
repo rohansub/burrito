@@ -10,6 +10,7 @@ import (
 type Database interface {
 	Get(args []string) map[string]string
 	Set(items []utils.Pair) bool
+	Delete(args []string) bool
 }
 
 // RedisDBInterface - interface that is implemented by redis.Client,
@@ -17,4 +18,5 @@ type Database interface {
 type RedisDBInterface interface {
 	Get(key string) *redis.StringCmd
 	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	Del(keys ...string) *redis.IntCmd
 }

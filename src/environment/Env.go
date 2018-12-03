@@ -90,8 +90,10 @@ func CreateStringEntry(name string, st string) *EnvEntry {
 	}
 }
 
+// BurritoTemplateData - Struct to organize burrito data into Template-parasable data
 type BurritoTemplateData struct {
 	Url interface{}
+	Form interface{}
 	Data interface{}
 }
 
@@ -102,4 +104,50 @@ func CreateBurritoTemplateData(urlEnv * Env, respEnv * Env) BurritoTemplateData{
 	t.Url = urlEnv.Data()
 	t.Data = respEnv.Data()
 	return t
+}
+
+
+// EnvironmentGroup - Group of environment structures used when a request is parsed
+type EnvironmentGroup struct {
+	Url	*Env
+	Form *Env
+	Resp *Env
+}
+
+// CreateEnvironmentGroup - Creates and environment group
+func CreateEnvironmentGroup(url *Env, form *Env, resp *Env) *EnvironmentGroup{
+	return &EnvironmentGroup{
+		Url: url,
+		Form: form,
+		Resp: resp,
+	}
+}
+
+
+// GetValue - get value specified in an environment group
+func (eg * EnvironmentGroup) GetValue(key string) interface{}{
+	inResp := eg.Url.GetValue(key)
+	if inResp != nil {
+		return inResp
+	}
+
+	inForm := eg.Url.GetValue(key)
+	if inForm != nil {
+		return inForm
+	}
+
+	inUrl := eg.Url.GetValue(key)
+	if inUrl != nil {
+		return inUrl
+	}
+
+	return nil
+}
+
+func (eg * EnvironmentGroup) Dump() interface{} {
+	return BurritoTemplateData{
+		Url: eg.Url.Data(),
+		Form: eg.Form.Data(),
+		Data: eg.Resp.Data(),
+	}
 }

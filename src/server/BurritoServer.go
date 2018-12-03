@@ -46,11 +46,11 @@ func NewBurritoServer(
 	return server
 }
 
-func (bs *BurritoServer) queryDB(res parser.Resp, urlEnv *environment.Env, respEnv *environment.Env) {
-	data, _ := res.DBReq.Run(bs.client, []*environment.Env{respEnv, urlEnv})
+func (bs *BurritoServer) queryDB(res parser.Resp, group *environment.EnvironmentGroup) {
+	data, _ := res.DBReq.Run(bs.client, *group)
 	for k, v := range data {
 		entry := *environment.CreateStringEntry(k, v)
-		respEnv.Add(entry)
+		group.Resp.Add(entry)
 	}
 
 }
@@ -60,8 +60,7 @@ func (bs *BurritoServer) render(
 	res parser.Resp,
 	w http.ResponseWriter,
 	r *http.Request,
-	urlEnv * environment.Env,
-	respEnv * environment.Env,
+	group *environment.EnvironmentGroup,
 ) bool {
 	if res.RespType == "FILE" {
 		w.Header().Set("Content-type", "text/html")
@@ -70,7 +69,7 @@ func (bs *BurritoServer) render(
 			w.WriteHeader(404)
 			w.Write([]byte("404 Something went wrong - " + http.StatusText(404)))
 		}
-		d := environment.CreateBurritoTemplateData(urlEnv, respEnv)
+		d := group.Dump()
 		f.Execute(w, &d)
 		return false
 
@@ -82,7 +81,7 @@ func (bs *BurritoServer) render(
 		WriteJson(w, res.Body)
 		return false
 	} else if res.RespType == "DB" {
-		bs.queryDB(res, urlEnv, respEnv)
+		bs.queryDB(res, group)
 		return true
 	}
 	return false
@@ -93,12 +92,11 @@ func (bs *BurritoServer) renderChain(
 	responses []parser.Resp,
 	w http.ResponseWriter,
 	r *http.Request,
-	urlEnv * environment.Env,
-	respEnv * environment.Env,
+	group *environment.EnvironmentGroup,
 ) {
 	chainContinue := true
 	for i, res := range responses {
-		chainContinue = bs.render(res, w, r, urlEnv, respEnv)
+		chainContinue = bs.render(res, w, r, group)
 		if !chainContinue {
 			if i != len(responses)-1 {
 				log.Println("WARN: Response sent before all actions completed!")
@@ -107,7 +105,7 @@ func (bs *BurritoServer) renderChain(
 		}
 	}
 	if chainContinue {
-		WriteJson(w, respEnv.Data())
+		WriteJson(w, group.Resp.Data())
 	}
 }
 
@@ -116,11 +114,22 @@ func (bs *BurritoServer) renderChain(
 // addHandler - for given path and method map
 func (bs *BurritoServer) addHandler(path string, methodMap map[string][]parser.Resp) {
 	bs.router.HandleFunc(path, func(w http.ResponseWriter, r *http.Request, env * environment.Env) {
-		// TODO: Create Burrito Env with all url data included, and pass that into renderChain
+		// set form data and url data in an environment
+		r.ParseForm()
+		formEnv := environment.CreateEnv()
+		for k, _ := range r.Form {
+			entry := environment.CreateStringEntry(k, r.Form.Get(k))
+			formEnv.Add(*entry)
+		}
+		// set response data in an environment
 		respEnv := environment.CreateEnv()
+
+
+		group := environment.CreateEnvironmentGroup(env, formEnv, respEnv)
+
 		for k, v := range methodMap {
 			if r.Method == k {
-				bs.renderChain(v, w, r, env, respEnv)
+				bs.renderChain(v, w, r, group)
 			}
 		}
 	})

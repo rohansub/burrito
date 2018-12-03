@@ -22,7 +22,7 @@ func TestParam_GetValue(t *testing.T) {
 		Val      string
 	}
 	type args struct {
-		envs []*environment.Env
+		envs environment.EnvironmentGroup
 	}
 	tests := []struct {
 		name   string
@@ -38,7 +38,7 @@ func TestParam_GetValue(t *testing.T) {
 				Val:      "hello",
 			},
 			args: args{
-				envs: []*environment.Env{env1, env2},
+				envs: *environment.CreateEnvironmentGroup(env1, nil, nil),
 			},
 			want:   "hello",
 			wantOk: true,
@@ -50,7 +50,7 @@ func TestParam_GetValue(t *testing.T) {
 				Val:      "hello",
 			},
 			args: args{
-				envs: []*environment.Env{env1, env2},
+				envs: *environment.CreateEnvironmentGroup(env1, nil, nil),
 			},
 			want:   "world",
 			wantOk: true,
@@ -62,7 +62,7 @@ func TestParam_GetValue(t *testing.T) {
 				Val:      "nothere",
 			},
 			args: args{
-				envs: []*environment.Env{env1, env2},
+				envs: *environment.CreateEnvironmentGroup(env1, env2, nil),
 			},
 			want:   "",
 			wantOk: false,
@@ -140,7 +140,7 @@ func TestGetReq_Run(t *testing.T) {
 	}
 	type args struct {
 		client Database
-		envs   []*environment.Env
+		envs   environment.EnvironmentGroup
 	}
 	tests := []struct {
 		name   string
@@ -170,7 +170,7 @@ func TestGetReq_Run(t *testing.T) {
 						"Burrito": "food",
 					}),
 				),
-				envs: []*environment.Env{},
+				envs: *environment.CreateEnvironmentGroup(nil, nil, nil),
 			},
 			want: map[string]string{
 				"Veggie":  "great",
@@ -198,9 +198,7 @@ func TestGetReq_Run(t *testing.T) {
 						"Burrito": "food",
 					}),
 				),
-				envs: []*environment.Env{
-					env,
-				},
+				envs: *environment.CreateEnvironmentGroup(env, nil, nil),
 			},
 			want: map[string]string{
 				"Veggie":  "great",
@@ -284,7 +282,7 @@ func TestSetReq_Run(t *testing.T) {
 	}
 	type args struct {
 		client Database
-		envs   []*environment.Env
+		envs   environment.EnvironmentGroup
 	}
 	type getFields struct {
 		ArgNames []Param
@@ -329,7 +327,7 @@ func TestSetReq_Run(t *testing.T) {
 				client: NewRedisDB(
 					mockredis.NewMockRedisClient(map[string]string{}),
 				),
-				envs: []*environment.Env{},
+				envs: *environment.CreateEnvironmentGroup(nil, nil, nil),
 			},
 			want: map[string]string{},
 			wantErr: false,
@@ -381,7 +379,7 @@ func TestSetReq_Run(t *testing.T) {
 				client: NewRedisDB(
 					mockredis.NewMockRedisClient(map[string]string{}),
 				),
-				envs: []*environment.Env{env},
+				envs: *environment.CreateEnvironmentGroup(env, nil, nil),
 			},
 			want: map[string]string{},
 			wantErr: false,
