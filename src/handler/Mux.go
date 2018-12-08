@@ -3,12 +3,12 @@ package handler
 import (
 	"github.com/rcsubra2/burrito/src/environment"
 	"net/http"
-	"strings"
 )
 
 // Router - list of routes that are handled by the burrito server
 type Router struct {
 	routes []*route
+	zester Zester
 }
 
 // BurritoHandlerFunc - type is an adapter to allow the use of
@@ -34,27 +34,25 @@ func NewRouter() (*Router) {
 	}
 }
 
-func extractList(lst []string) []*PathSegment{
-	// Ignores the string before the first "/"
-	lstPaths := make([]*PathSegment, len(lst)-1)
-	for i, p := range lst[1:] {
-		lstPaths[i] = NewPathSegment(p)
-	}
-	return lstPaths
+func (r* Router) CheckRoutes() error {
+	return r.zester.CheckPaths()
 }
+
 
 
 
 // Source: https://stackoverflow.com/questions/6564558/wildcards-in-the-pattern-for-http-handlefunc
 
 func (h *Router) Handler(pattern string, handler BurritoHandler) {
-	lst := strings.Split(pattern, "/")
-	h.routes = append(h.routes, &route{extractList(lst), handler})
+	pathObj := NewPathObject(pattern)
+	h.zester.Add(pathObj)
+	h.routes = append(h.routes, &route{pathObj, handler})
 }
 
 func (h *Router) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request, *environment.Env)) {
-	lst := strings.Split(pattern, "/")
-	h.routes = append(h.routes, &route{extractList(lst), BurritoHandlerFunc(handler)})
+	pathObj := NewPathObject(pattern)
+	h.zester.Add(pathObj)
+	h.routes = append(h.routes, &route{pathObj, BurritoHandlerFunc(handler)})
 }
 
 func (h *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {

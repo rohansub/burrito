@@ -20,7 +20,11 @@ func main() {
 		return
 	}
 
-	serv := server.NewBurritoServer(&routes, nil)
-
+	serv, err := server.NewBurritoServer(&routes, nil)
+	if err != nil {
+		fmt.Println("The zester has caught a route conflict!, server cannot run")
+		fmt.Println(err)
+		return
+	}
 	serv.Run()
 }

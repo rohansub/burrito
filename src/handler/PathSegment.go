@@ -7,7 +7,7 @@ import (
 )
 
 // PathSegment - represents one "Segment" of a path (ie. the path
-// "/zesty/breakfast/burrito" would be split into "zesty", "breakfast"
+// "/zesty/breakfast/burrito" would be split into three segments "zesty", "breakfast"
 // and "burrito"
 type PathSegment struct {
 	mustMatch bool
@@ -79,5 +79,27 @@ func NewPathSegment(str string) *PathSegment {
 		}
 	}
 
+}
 
+// PathObject - represents one "Segment" of a path (ie. the path
+// "/zesty/breakfast/burrito" would be represented as one path object
+type PathObject struct {
+	parts []*PathSegment
+	str string
+}
+
+
+func NewPathObject(url string) *PathObject{
+	// Ignores the string before the first "/"
+	pathStrLst := strings.Split(url, "/")
+	pathObjLst := make([]*PathSegment, len(pathStrLst)-1)
+
+	for i, p := range pathStrLst[1:] {
+		pathObjLst[i] = NewPathSegment(p)
+	}
+
+	return &PathObject{
+		parts: pathObjLst,
+		str: url,
+	}
 }

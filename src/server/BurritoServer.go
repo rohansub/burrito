@@ -24,7 +24,7 @@ type BurritoServer struct {
 func NewBurritoServer(
 	rts *parser.ParsedRoutes,
 	mockData map[string]string,
-) *BurritoServer {
+) (*BurritoServer, error) {
 	r := handler.NewRouter()
 	var cli db.RedisDBInterface
 	if mockData == nil {
@@ -43,7 +43,8 @@ func NewBurritoServer(
 	for k, methodMap := range rts.Routes {
 		server.addHandler(k, methodMap)
 	}
-	return server
+	err := server.router.CheckRoutes()
+	return server, err
 }
 
 func (bs *BurritoServer) queryDB(res parser.Resp, group *environment.EnvironmentGroup) {

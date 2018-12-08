@@ -6,7 +6,7 @@ import (
 )
 
 type route struct {
-	pattern []*PathSegment
+	pattern *PathObject
 	handler BurritoHandler
 }
 
@@ -18,14 +18,14 @@ func (r * route) Match(path string) (bool, *environment.Env) {
 
 
 	// return false i the length of the url doesn't match this route
-	if len(parts) != len(r.pattern) {
+	if len(parts) != len(r.pattern.parts) {
 		return false, nil
 	}
 
 	env := environment.CreateEnv()
 
 	for i, st := range parts {
-		p := r.pattern[i]
+		p := r.pattern.parts[i]
 		match, entry := p.SegMatchAndExtractVars(st)
 		if !match {
 			return false, nil

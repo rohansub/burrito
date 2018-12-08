@@ -2,31 +2,32 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/rcsubra2/burrito/src/db"
-	"github.com/rcsubra2/burrito/src/parser"
-	"github.com/rcsubra2/burrito/src/utils"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+
+	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rcsubra2/burrito/src/parser"
+	"github.com/rcsubra2/burrito/src/utils"
 )
 
 func TestBurritoServer_Run(t *testing.T) {
 	type fields struct {
-		Routes *parser.ParsedRoutes
+		Routes   *parser.ParsedRoutes
 		MockInit map[string]string
 	}
 	type arg struct {
-		method string
-		uri    string
+		method   string
+		uri      string
 		wantType string
-		want   interface{}
+		want     interface{}
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		args []arg
+		args   []arg
 	}{
 		{
 			name: "Standard Server String and file data only",
@@ -60,21 +61,21 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/",
-					want: "<p>Hello</p>",
+					method:   "GET",
+					uri:      "/",
+					want:     "<p>Hello</p>",
 					wantType: "text/html",
 				},
 				{
-					method: "GET",
-					uri: "/hello",
-					want: "<p>World</p>",
+					method:   "GET",
+					uri:      "/hello",
+					want:     "<p>World</p>",
 					wantType: "text/html",
 				},
 				{
-					method: "PUT",
-					uri: "/hello",
-					want: "I am zesty",
+					method:   "PUT",
+					uri:      "/hello",
+					want:     "I am zesty",
 					wantType: "text/html",
 				},
 			},
@@ -105,19 +106,18 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/",
-					want: "<p>Hello</p>",
+					method:   "GET",
+					uri:      "/",
+					want:     "<p>Hello</p>",
 					wantType: "text/html",
 				},
 				{
-					method: "GET",
-					uri: "/zesty/fool",
-					want: "<h>fool</h>",
+					method:   "GET",
+					uri:      "/zesty/fool",
+					want:     "<h>fool</h>",
 					wantType: "text/html",
 				},
 			},
-
 		},
 		{
 			name: "GET JSON data",
@@ -128,8 +128,8 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								parser.Resp{
 									RespType: "JSON",
-									Body:     map[string]interface{}{
-										"zesty":"burrito",
+									Body: map[string]interface{}{
+										"zesty": "burrito",
 									},
 								},
 							},
@@ -139,14 +139,13 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/",
+					method:   "GET",
+					uri:      "/",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"zesty":"burrito",
+					want: map[string]interface{}{
+						"zesty": "burrito",
 					},
 				},
-
 			},
 		},
 		{
@@ -158,11 +157,11 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:  &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: true,
-												Val: "zesty",
+												Val:      "zesty",
 											},
 										},
 									},
@@ -177,14 +176,13 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/",
+					method:   "GET",
+					uri:      "/",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"zesty":"burrito",
+					want: map[string]interface{}{
+						"zesty": "burrito",
 					},
 				},
-
 			},
 		},
 		{
@@ -196,11 +194,11 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:  &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: false,
-												Val: "zesty",
+												Val:      "zesty",
 											},
 										},
 									},
@@ -215,14 +213,13 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/hello",
+					method:   "GET",
+					uri:      "/hello",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"hello":"burrito",
+					want: map[string]interface{}{
+						"hello": "burrito",
 					},
 				},
-
 			},
 		},
 		{
@@ -234,15 +231,15 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:  &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: false,
-												Val: "zesty",
+												Val:      "zesty",
 											},
 											{
 												IsString: true,
-												Val: "quesadilla",
+												Val:      "quesadilla",
 											},
 										},
 									},
@@ -252,21 +249,20 @@ func TestBurritoServer_Run(t *testing.T) {
 					},
 				},
 				MockInit: map[string]string{
-					"hello": "burrito",
+					"hello":      "burrito",
 					"quesadilla": "cheese",
 				},
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/hello",
+					method:   "GET",
+					uri:      "/hello",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"hello":"burrito",
+					want: map[string]interface{}{
+						"hello":      "burrito",
 						"quesadilla": "cheese",
 					},
 				},
-
 			},
 		},
 		{
@@ -278,15 +274,15 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:   &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: false,
-												Val: "zesty",
+												Val:      "zesty",
 											},
 											{
 												IsString: true,
-												Val: "quesadilla",
+												Val:      "quesadilla",
 											},
 										},
 									},
@@ -301,14 +297,13 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/hello",
+					method:   "GET",
+					uri:      "/hello",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"hello":"burrito",
+					want: map[string]interface{}{
+						"hello": "burrito",
 					},
 				},
-
 			},
 		},
 		{
@@ -320,16 +315,16 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:   &db.SetReq{
+									DBReq: &db.SetReq{
 										ArgNames: []utils.Pair{
 											{
 												Fst: db.Param{
 													IsString: false,
-													Val: "zesty",
+													Val:      "zesty",
 												},
 												Snd: db.Param{
 													IsString: true,
-													Val: "quesadilla",
+													Val:      "quesadilla",
 												},
 											},
 										},
@@ -345,12 +340,11 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "PUT",
-					uri: "/hello",
+					method:   "PUT",
+					uri:      "/hello",
 					wantType: "app/json",
-					want: map[string]interface{} {},
+					want:     map[string]interface{}{},
 				},
-
 			},
 		},
 		{
@@ -362,26 +356,26 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:   &db.SetReq{
+									DBReq: &db.SetReq{
 										ArgNames: []utils.Pair{
 											{
 												Fst: db.Param{
 													IsString: false,
-													Val: "zesty",
+													Val:      "zesty",
 												},
 												Snd: db.Param{
 													IsString: true,
-													Val: "quesadilla",
+													Val:      "quesadilla",
 												},
 											},
 											{
 												Fst: db.Param{
 													IsString: true,
-													Val: "burrito",
+													Val:      "burrito",
 												},
 												Snd: db.Param{
 													IsString: true,
-													Val: "supreme",
+													Val:      "supreme",
 												},
 											},
 										},
@@ -389,15 +383,15 @@ func TestBurritoServer_Run(t *testing.T) {
 								},
 								{
 									RespType: "DB",
-									DBReq:   &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: false,
-												Val: "zesty",
+												Val:      "zesty",
 											},
 											{
 												IsString: true,
-												Val: "burrito",
+												Val:      "burrito",
 											},
 										},
 									},
@@ -407,21 +401,20 @@ func TestBurritoServer_Run(t *testing.T) {
 					},
 				},
 				MockInit: map[string]string{
-					"hello": "different",
+					"hello":   "different",
 					"burrito": "notsame",
 				},
 			},
 			args: []arg{
 				{
-					method: "PUT",
-					uri: "/hello",
+					method:   "PUT",
+					uri:      "/hello",
 					wantType: "app/json",
-					want: map[string]interface{} {
-						"hello": "quesadilla",
+					want: map[string]interface{}{
+						"hello":   "quesadilla",
 						"burrito": "supreme",
 					},
 				},
-
 			},
 		},
 		{
@@ -433,26 +426,26 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq:   &db.SetReq{
+									DBReq: &db.SetReq{
 										ArgNames: []utils.Pair{
 											{
 												Fst: db.Param{
 													IsString: true,
-													Val: "name",
+													Val:      "name",
 												},
 												Snd: db.Param{
 													IsString: false,
-													Val: "name",
+													Val:      "name",
 												},
 											},
 											{
 												Fst: db.Param{
 													IsString: true,
-													Val: "greeting",
+													Val:      "greeting",
 												},
 												Snd: db.Param{
 													IsString: true,
-													Val: "hello",
+													Val:      "hello",
 												},
 											},
 										},
@@ -460,15 +453,15 @@ func TestBurritoServer_Run(t *testing.T) {
 								},
 								{
 									RespType: "DB",
-									DBReq:   &db.GetReq{
+									DBReq: &db.GetReq{
 										ArgNames: []db.Param{
 											{
 												IsString: true,
-												Val: "name",
+												Val:      "name",
 											},
 											{
 												IsString: true,
-												Val: "greeting",
+												Val:      "greeting",
 											},
 										},
 									},
@@ -485,12 +478,11 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "PUT",
-					uri: "/rohan",
+					method:   "PUT",
+					uri:      "/rohan",
 					wantType: "text/html",
-					want: "<h>rohan</h>\n<h>rohan</h>\n<h>hello</h>",
+					want:     "<h>rohan</h>\n<h>rohan</h>\n<h>hello</h>",
 				},
-
 			},
 		},
 		{
@@ -519,24 +511,23 @@ func TestBurritoServer_Run(t *testing.T) {
 			},
 			args: []arg{
 				{
-					method: "GET",
-					uri: "/",
-					want: "<p>Hello</p>",
+					method:   "GET",
+					uri:      "/",
+					want:     "<p>Hello</p>",
 					wantType: "text/html",
 				},
 				{
-					method: "GET",
-					uri: "/zesty?burrito=fool",
-					want: "<h>fool</h>",
+					method:   "GET",
+					uri:      "/zesty?burrito=fool",
+					want:     "<h>fool</h>",
 					wantType: "text/html",
 				},
 			},
-
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := NewBurritoServer(tt.fields.Routes, tt.fields.MockInit)
+			b, _ := NewBurritoServer(tt.fields.Routes, tt.fields.MockInit)
 
 			// source: https://stackoverflow.com/questions/16154999/how-to-test-http-calls-in-go-using-httptest
 			resp := httptest.NewRecorder()
@@ -553,7 +544,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				if p, err := ioutil.ReadAll(resp.Body); err != nil {
 					t.Fail()
 				} else {
-					if ar.wantType == "text/html" && !reflect.DeepEqual(string(p),ar.want) {
+					if ar.wantType == "text/html" && !reflect.DeepEqual(string(p), ar.want) {
 						t.Errorf("Wanted %s - Got %s", ar.want, p)
 					} else if ar.wantType == "app/json" {
 						var d interface{}
@@ -568,5 +559,68 @@ func TestBurritoServer_Run(t *testing.T) {
 			}
 		})
 
+	}
+}
+
+func TestNewBurritoServer(t *testing.T) {
+	type args struct {
+		rts      *parser.ParsedRoutes
+		mockData map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Test Create, with no route conflicts",
+			args: args {
+				rts: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/": {
+							"GET": []parser.Resp{},
+						},
+						"/hello": {
+							"GET": []parser.Resp{},
+						},
+						"/hello/:world": {
+							"GET": []parser.Resp{},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test Create, with route conflicts",
+			args: args {
+				rts: &parser.ParsedRoutes{
+					Routes: map[string]map[string][]parser.Resp{
+						"/": {
+							"GET": []parser.Resp{},
+						},
+						"/hello": {
+							"GET": []parser.Resp{},
+						},
+						"/hello/:world": {
+							"GET": []parser.Resp{},
+						},
+						"/:chicken/nugget": {
+							"GET": []parser.Resp{},
+						},
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewBurritoServer(tt.args.rts, tt.args.mockData)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewBurritoServer() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
 	}
 }

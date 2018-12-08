@@ -170,8 +170,8 @@ func TestParseBurritoFile(t *testing.T) {
 						"GET": []Resp{
 							Resp{
 								RespType: "JSON",
-								Body:     map[string]interface{}{
-									"breakfast" : "burrito",
+								Body: map[string]interface{}{
+									"breakfast": "burrito",
 								},
 							},
 						},

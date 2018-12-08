@@ -9,7 +9,7 @@ import (
 
 func Test_route_Match(t *testing.T) {
 	type fields struct {
-		pattern []*PathSegment
+		pattern *PathObject
 		handler BurritoHandler
 	}
 	type args struct {
@@ -25,15 +25,18 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route no variables, route matches",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern: &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: true,
+							segStr: "burrito",
+						},
 					},
-					{
-						mustMatch: true,
-						segStr: "burrito",
-					},
+					str: "/zesty/burrito",
 				},
 			},
 			args: args {
@@ -48,15 +51,18 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route no variables, route doesn't match",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: true,
+							segStr: "burrito",
+						},
 					},
-					{
-						mustMatch: true,
-						segStr: "burrito",
-					},
+					str: "/zesty/burrito",
 				},
 			},
 			args: args {
@@ -68,15 +74,18 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route no variables, route doesn't match due to length",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: true,
+							segStr: "burrito",
+						},
 					},
-					{
-						mustMatch: true,
-						segStr: "burrito",
-					},
+					str: "/zesty/burrito",
 				},
 			},
 			args: args {
@@ -88,16 +97,19 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route int variable, route matches",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "int",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "int",
-					},
+					str: "/zesty/:burrito:int",
 				},
 			},
 			args: args {
@@ -113,16 +125,19 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route float variable, route matches",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "float",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "float",
-					},
+					str: "/zesty/:burrito:float",
 				},
 			},
 			args: args {
@@ -138,16 +153,19 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route string variable, route matches",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "str",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "string",
-					},
+					str: "/zesty/:burrito:str",
 				},
 			},
 			args: args {
@@ -163,16 +181,19 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route int variable, no route match",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "int",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "int",
-					},
+					str: "/zesty/:burrito:int",
 				},
 			},
 			args: args {
@@ -184,16 +205,19 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Route float variable, no route match",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: true,
-						segStr: "zesty",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: true,
+							segStr: "zesty",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "float",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "float",
-					},
+					str: "/zesty/:burrito:float",
 				},
 			},
 			args: args {
@@ -205,17 +229,20 @@ func Test_route_Match(t *testing.T) {
 		{
 			name: "Multiple variables,  match",
 			fields: fields {
-				pattern: []*PathSegment{
-					{
-						mustMatch: false,
-						varName: "zesty",
-						typeMatch: "string",
+				pattern:  &PathObject{
+					parts: []*PathSegment{
+						{
+							mustMatch: false,
+							varName: "zesty",
+							typeMatch: "str",
+						},
+						{
+							mustMatch: false,
+							varName: "burrito",
+							typeMatch: "int",
+						},
 					},
-					{
-						mustMatch: false,
-						varName: "burrito",
-						typeMatch: "int",
-					},
+					str: "/:zesty/:burrito:int",
 				},
 			},
 			args: args {
