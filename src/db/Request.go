@@ -10,7 +10,7 @@ import (
 )
 
 type Req interface {
-	Run(client Database, group environment.EnvironmentGroup) (map[string]string, error)
+	Run(client DatabaseInterface, group environment.EnvironmentGroup) (map[string]string, error)
 }
 
 type Param struct {
@@ -53,7 +53,7 @@ func CreateDBGetReq(argStrs []string) *GetReq {
 }
 
 // Run - perform the request on given database.
-func (r * GetReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
+func (r * GetReq) Run(client DatabaseInterface, group environment.EnvironmentGroup) (map[string]string, error) {
 	keys := make([]string, len(r.ArgNames))
 	for i, ar := range r.ArgNames {
 		val, ok := ar.GetValue(group)
@@ -94,7 +94,7 @@ func CreateDBSetReq(argStrs []string) *SetReq {
 	}
 }
 
-func (req * SetReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
+func (req * SetReq) Run(client DatabaseInterface, group environment.EnvironmentGroup) (map[string]string, error) {
 	pairs := make([]utils.Pair, len(req.ArgNames))
 	for i, ar := range req.ArgNames {
 		kParam := ar.Fst.(Param)
@@ -143,7 +143,7 @@ func CreateDBDelReq(argStrs []string) *DelReq {
 }
 
 // Run - perform the request on given database.
-func (r * DelReq) Run(client Database, group environment.EnvironmentGroup) (map[string]string, error) {
+func (r * DelReq) Run(client DatabaseInterface, group environment.EnvironmentGroup) (map[string]string, error) {
 	keys := make([]string, len(r.ArgNames))
 	for i, ar := range r.ArgNames {
 		val, ok := ar.GetValue(group)

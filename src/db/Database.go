@@ -2,12 +2,16 @@ package db
 
 import (
 	"github.com/go-redis/redis"
+	"github.com/rcsubra2/burrito/src/environment"
 	"github.com/rcsubra2/burrito/src/utils"
 	"time"
 )
 
-// Database - The interface for database clients
-type Database interface {
+type DatabaseFunction func(group environment.EnvironmentGroup) (interface{}, error)
+
+
+// DatabaseInterface - The interface for database clients
+type DatabaseInterface interface {
 	Get(args []string) map[string]string
 	Set(items []utils.Pair) bool
 	Delete(args []string) bool

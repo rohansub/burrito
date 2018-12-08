@@ -17,7 +17,7 @@ import (
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
 	router *handler.Router
-	client db.Database
+	client db.DatabaseInterface
 }
 
 // NewBurritoServer  create server server, and initialize route handlers

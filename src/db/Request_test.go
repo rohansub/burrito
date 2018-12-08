@@ -139,7 +139,7 @@ func TestGetReq_Run(t *testing.T) {
 		ArgNames []Param
 	}
 	type args struct {
-		client Database
+		client DatabaseInterface
 		envs   environment.EnvironmentGroup
 	}
 	tests := []struct {
@@ -280,7 +280,7 @@ func TestSetReq_Run(t *testing.T) {
 		ArgNames []utils.Pair
 	}
 	type args struct {
-		client Database
+		client DatabaseInterface
 		envs   environment.EnvironmentGroup
 	}
 	type getFields struct {
@@ -481,7 +481,7 @@ func TestDelReq_Run(t *testing.T) {
 		ArgNames []Param
 	}
 	type args struct {
-		client Database
+		client DatabaseInterface
 		group  environment.EnvironmentGroup
 	}
 	tests := []struct {
