@@ -1,141 +1,64 @@
 package parser
 
 import (
-	"github.com/rcsubra2/burrito/src/utils"
+	db2 "github.com/rcsubra2/burrito/src/redis"
 	"reflect"
 	"testing"
 
 	"github.com/rcsubra2/burrito/src/db"
 )
 
-func Test_createRespForDB(t *testing.T) {
+
+func Test_createDBCall(t *testing.T) {
 	type args struct {
 		respStr string
+		databases    map[string]db.Database
 	}
 	tests := []struct {
 		name string
 		args args
-		want db.Req
+		want *db.DatabaseAction
 	}{
 		{
-			name: "Test DB.GET Strings",
+			name: "Test database exists",
 			args: args {
-				"DB.GET('hello','world',)",
-			},
-			want: &db.GetReq {
-				ArgNames: []db.Param{
-					{
-						IsString: true,
-						Val:      "hello",
-					},
-					{
-						IsString: true,
-						Val:      "world",
-					},
+				respStr: "rds.GET(hello,)",
+				databases: map[string]db.Database{
+					"rds": db2.NewRedisDatabase(true, "", ""),
 				},
 			},
-
-		},
-		{
-			name: "Test DB.GET Variables",
-			args: args {
-				"DB.GET(zesty, burrito,)",
-			},
-			want: &db.GetReq{
-				ArgNames: []db.Param{
-					{
-						IsString: false,
-						Val:      "zesty",
-					},
-					{
-						IsString: false,
-						Val:      "burrito",
-					},
-				},
-			},
-
-		},
-		{
-			name: "Test DB.GET Variables and strings",
-			args: args {
-				"DB.GET(zesty, 'burrito', tomorrow,)",
-			},
-			want: &db.GetReq{
-				ArgNames: []db.Param{
-					{
-						IsString: false,
-						Val: "zesty",
-					},
-					{
-						IsString: true,
-						Val: "burrito",
-					},
-					{
-						IsString: false,
-						Val: "tomorrow",
-					},
-
-				},
+			want: &db.DatabaseAction{
+				Name: "rds",
+				Fname: "GET",
+				Args: "hello,",
 			},
 		},
 		{
-			name: "Test DB.SET",
+			name: "Test database doesn't exist",
 			args: args {
-				"DB.SET((zesty,'burrito'), ('zesty2',burrito2),)",
-			},
-			want: &db.SetReq{
-				ArgNames: []utils.Pair{
-					{
-						Fst: db.Param {
-							IsString: false,
-							Val: "zesty",
-						},
-						Snd: db.Param {
-							IsString: true,
-							Val: "burrito",
-						},
-					},
-					{
-						Fst: db.Param {
-							IsString: true,
-							Val: "zesty2",
-						},
-						Snd: db.Param {
-							IsString: false,
-							Val: "burrito2",
-						},
-					},
+				respStr: "rds.GET(hello,)",
+				databases: map[string]db.Database{
+					"rds1": db2.NewRedisDatabase(true, "", ""),
 				},
 			},
+			want: nil,
 		},
 		{
-			name: "Test DB.DEL Variables and strings",
+			name: "Test not correct db function syntax",
 			args: args {
-				"DB.DEL(zesty, 'burrito', tomorrow,)",
-			},
-			want: &db.DelReq{
-				ArgNames: []db.Param{
-					{
-						IsString: false,
-						Val: "zesty",
-					},
-					{
-						IsString: true,
-						Val: "burrito",
-					},
-					{
-						IsString: false,
-						Val: "tomorrow",
-					},
-
+				respStr: "rdsGET(hello,)",
+				databases: map[string]db.Database{
+					"rds1": db2.NewRedisDatabase(true, "", ""),
 				},
 			},
+			want: nil,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := createRespForDB(tt.args.respStr); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("createRespForDB() = %v, want %v", got, tt.want)
+			if got := createDBCall(tt.args.respStr, tt.args.databases); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("createDBCall() = %v, want %v", got, tt.want)
 			}
 		})
 	}

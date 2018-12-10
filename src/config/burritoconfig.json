@@ -1,0 +1,13 @@
+{
+  "name": "My Server",
+  "databases": {
+    "rds": {
+      "type": "Redis",
+      "is_mock": true,
+      "server": {
+        "url": "localhost:9000",
+        "password": ""
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/rcsubra2/burrito/src/db"
 	"reflect"
 	"testing"
 )
@@ -86,6 +87,7 @@ func TestParsedRoutes_AddRules(t *testing.T) {
 func TestParseBurritoFile(t *testing.T) {
 	type args struct {
 		filepath string
+		databases map[string]db.Database
 	}
 	tests := []struct {
 		name    string
@@ -198,7 +200,7 @@ func TestParseBurritoFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseBurritoFile(tt.args.filepath)
+			got, err := ParseBurritoFile(tt.args.filepath, tt.args.databases)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ParseBurritoFile() error = %v, wantErr %v", err, tt.wantErr)
 				return

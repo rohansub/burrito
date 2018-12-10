@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"github.com/rcsubra2/burrito/src/db"
 	"io/ioutil"
 	str "strings"
 )
@@ -31,7 +32,7 @@ func (rts *ParsedRoutes) AddRules(ar Arg, bodies []Resp) error {
 }
 
 // ParseBurritoFile - parse a server file into a ParsedRoutes object
-func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
+func ParseBurritoFile(filepath string, databases map[string]db.Database) (ParsedRoutes, error) {
 	content, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return ParsedRoutes{}, err
@@ -75,7 +76,7 @@ func ParseBurritoFile(filepath string) (ParsedRoutes, error) {
 
 		resp := make([]Resp, len(parts)-1)
 		for i, partStr := range parts[1:] {
-			resp[i], err = createResp(str.Trim(partStr, " \n\t"))
+			resp[i], err = createResp(str.Trim(partStr, " \n\t"), databases)
 			if err != nil {
 				m := "Failed to compile this response part: " + partStr
 				return ParsedRoutes{}, errors.New(m)

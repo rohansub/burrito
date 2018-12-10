@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/rcsubra2/burrito/src/redis"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -10,13 +11,12 @@ import (
 
 	"github.com/rcsubra2/burrito/src/db"
 	"github.com/rcsubra2/burrito/src/parser"
-	"github.com/rcsubra2/burrito/src/utils"
 )
 
 func TestBurritoServer_Run(t *testing.T) {
 	type fields struct {
 		Routes   *parser.ParsedRoutes
-		MockInit map[string]string
+		clis map[string]db.Database
 	}
 	type arg struct {
 		method   string
@@ -157,21 +157,24 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: true,
-												Val:      "zesty",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "rds",
+										Fname: "GET",
+										Args: "'zesty',",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"zesty": "burrito",
+				clis: map[string]db.Database{
+					"rds": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"zesty": "burrito",
+						})
+						return d;
+					}(),
 				},
 			},
 			args: []arg{
@@ -194,21 +197,24 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: false,
-												Val:      "zesty",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "rds",
+										Fname: "GET",
+										Args: "zesty,",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"hello": "burrito",
+				clis: map[string]db.Database{
+					"rds": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"hello": "burrito",
+						})
+						return d;
+					}(),
 				},
 			},
 			args: []arg{
@@ -231,26 +237,25 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: false,
-												Val:      "zesty",
-											},
-											{
-												IsString: true,
-												Val:      "quesadilla",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "GET",
+										Args: "zesty, 'quesadilla',",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"hello":      "burrito",
-					"quesadilla": "cheese",
+				clis: map[string]db.Database{
+					"redis": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"hello":      "burrito",
+							"quesadilla": "cheese",
+						})
+						return d;
+					}(),
 				},
 			},
 			args: []arg{
@@ -274,25 +279,24 @@ func TestBurritoServer_Run(t *testing.T) {
 							"GET": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: false,
-												Val:      "zesty",
-											},
-											{
-												IsString: true,
-												Val:      "quesadilla",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "GET",
+										Args: "zesty, 'quesadilla',",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"hello": "burrito",
+				clis: map[string]db.Database{
+					"redis": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"hello":      "burrito",
+						})
+						return d;
+					}(),
 				},
 			},
 			args: []arg{
@@ -315,27 +319,24 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.SetReq{
-										ArgNames: []utils.Pair{
-											{
-												Fst: db.Param{
-													IsString: false,
-													Val:      "zesty",
-												},
-												Snd: db.Param{
-													IsString: true,
-													Val:      "quesadilla",
-												},
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "SET",
+										Args: "zesty, 'quesadilla',",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"hello": "burrito",
+				clis: map[string]db.Database{
+					"redis": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"hello": "burrito",
+						})
+						return d;
+					}(),
 				},
 			},
 			args: []arg{
@@ -356,54 +357,35 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.SetReq{
-										ArgNames: []utils.Pair{
-											{
-												Fst: db.Param{
-													IsString: false,
-													Val:      "zesty",
-												},
-												Snd: db.Param{
-													IsString: true,
-													Val:      "quesadilla",
-												},
-											},
-											{
-												Fst: db.Param{
-													IsString: true,
-													Val:      "burrito",
-												},
-												Snd: db.Param{
-													IsString: true,
-													Val:      "supreme",
-												},
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "SET",
+										Args: "(zesty, 'quesadilla'), ('burrito', 'supreme'), ",
 									},
 								},
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: false,
-												Val:      "zesty",
-											},
-											{
-												IsString: true,
-												Val:      "burrito",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "GET",
+										Args: "zesty, 'burrito', ",
 									},
 								},
 							},
 						},
 					},
 				},
-				MockInit: map[string]string{
-					"hello":   "different",
-					"burrito": "notsame",
+				clis: map[string]db.Database{
+					"redis": func() db.Database {
+						d := redis.NewRedisDatabase(true, "", "")
+						d.Client = redis.NewMockRedisClient(map[string]string {
+							"hello":   "different",
+							"burrito": "notsame",
+						})
+						return d;
+					}(),
 				},
+
 			},
 			args: []arg{
 				{
@@ -426,44 +408,18 @@ func TestBurritoServer_Run(t *testing.T) {
 							"PUT": []parser.Resp{
 								{
 									RespType: "DB",
-									DBReq: &db.SetReq{
-										ArgNames: []utils.Pair{
-											{
-												Fst: db.Param{
-													IsString: true,
-													Val:      "name",
-												},
-												Snd: db.Param{
-													IsString: false,
-													Val:      "name",
-												},
-											},
-											{
-												Fst: db.Param{
-													IsString: true,
-													Val:      "greeting",
-												},
-												Snd: db.Param{
-													IsString: true,
-													Val:      "hello",
-												},
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "SET",
+										Args: "('name', name), ('greeting', 'hello'), ",
 									},
 								},
 								{
 									RespType: "DB",
-									DBReq: &db.GetReq{
-										ArgNames: []db.Param{
-											{
-												IsString: true,
-												Val:      "name",
-											},
-											{
-												IsString: true,
-												Val:      "greeting",
-											},
-										},
+									DBReq: db.DatabaseAction{
+										Name: "redis",
+										Fname: "GET",
+										Args: "'name', 'greeting',",
 									},
 								},
 								{
@@ -474,7 +430,9 @@ func TestBurritoServer_Run(t *testing.T) {
 						},
 					},
 				},
-				MockInit: map[string]string{},
+				clis: map[string]db.Database{
+					"redis": redis.NewRedisDatabase(true, "", ""),
+				},
 			},
 			args: []arg{
 				{
@@ -484,6 +442,7 @@ func TestBurritoServer_Run(t *testing.T) {
 					want:     "<h>rohan</h>\n<h>rohan</h>\n<h>hello</h>",
 				},
 			},
+
 		},
 		{
 			name: "Serve Template data, given form data",
@@ -527,7 +486,7 @@ func TestBurritoServer_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b, _ := NewBurritoServer(tt.fields.Routes, tt.fields.MockInit)
+			b, _ := NewBurritoServer(tt.fields.Routes, tt.fields.clis)
 
 			// source: https://stackoverflow.com/questions/16154999/how-to-test-http-calls-in-go-using-httptest
 			resp := httptest.NewRecorder()
@@ -616,7 +575,7 @@ func TestNewBurritoServer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := NewBurritoServer(tt.args.rts, tt.args.mockData)
+			_, err := NewBurritoServer(tt.args.rts, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewBurritoServer() error = %v, wantErr %v", err, tt.wantErr)
 				return

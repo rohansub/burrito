@@ -3,9 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis"
 	"github.com/rcsubra2/burrito/src/db"
-	"github.com/rcsubra2/burrito/src/mockredis"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,41 +15,43 @@ import (
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {
 	router *handler.Router
-	client db.DatabaseInterface
+	dbClients map[string]db.Database
 }
 
 // NewBurritoServer  create server server, and initialize route handlers
 func NewBurritoServer(
 	rts *parser.ParsedRoutes,
-	mockData map[string]string,
+	clis map[string]db.Database,
 ) (*BurritoServer, error) {
+
 	r := handler.NewRouter()
-	var cli db.RedisDBInterface
-	if mockData == nil {
-		cli = redis.NewClient(&redis.Options{
-			Addr:     "localhost:9000",
-			Password: "", // no password set
-			DB:       0,  // use default DB
-		})
-	} else {
-		cli = mockredis.NewMockRedisClient(mockData)
-	}
 	server := &BurritoServer{
 		router: r,
-		client: db.NewRedisDB(cli),
+		dbClients: clis,
 	}
+
 	for k, methodMap := range rts.Routes {
 		server.addHandler(k, methodMap)
 	}
+
 	err := server.router.CheckRoutes()
+
 	return server, err
 }
 
 func (bs *BurritoServer) queryDB(res parser.Resp, group *environment.EnvironmentGroup) {
-	data, _ := res.DBReq.Run(bs.client, *group)
+	dbCli, ok := bs.dbClients[res.DBReq.Name]
+	if !ok {
+		return
+	}
+
+	data, _ :=  dbCli.Run(res.DBReq.Fname, res.DBReq.Args, *group)
 	for k, v := range data {
-		entry := *environment.CreateStringEntry(k, v)
-		group.Resp.Add(entry)
+		vStr, ok := v.(string)
+		if ok {
+			entry := *environment.CreateStringEntry(k, vStr)
+			group.Resp.Add(entry)
+		}
 	}
 
 }

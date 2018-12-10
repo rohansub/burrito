@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rcsubra2/burrito/src/redis"
 	"reflect"
 	"testing"
 )
@@ -9,6 +10,7 @@ import (
 func Test_createResp(t *testing.T) {
 	type args struct {
 		respStr string
+		databases map[string]db.Database
 	}
 	tests := []struct {
 		name    string
@@ -86,21 +88,17 @@ func Test_createResp(t *testing.T) {
 		{
 			name: "DB data",
 			args: args{
-				respStr: `DB.GET(varname,'hello',)`,
+				respStr: `redis.GET(varname,'hello',)`,
+				databases: map[string]db.Database{
+					"redis": redis.NewRedisDatabase(true, "", ""),
+				},
 			},
 			want: Resp{
 				RespType: "DB",
-				DBReq:    &db.GetReq{
-					ArgNames: []db.Param{
-						db.Param{
-							false,
-							"varname",
-						},
-						db.Param{
-							true,
-							"hello",
-						},
-					},
+				DBReq:    db.DatabaseAction{
+					Name: "redis",
+					Fname: "GET",
+					Args: "varname,'hello',",
 				},
 			},
 			wantErr: false,
@@ -108,7 +106,7 @@ func Test_createResp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := createResp(tt.args.respStr)
+			got, err := createResp(tt.args.respStr, tt.args.databases)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("createResp() error = %v, wantErr %v", err, tt.wantErr)
 				return

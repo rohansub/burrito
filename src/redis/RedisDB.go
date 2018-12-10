@@ -1,4 +1,4 @@
-package db
+package redis
 
 import (
 	"github.com/go-redis/redis"
@@ -11,6 +11,13 @@ import (
 )
 
 
+const (
+	singleItem = `(\w+|(?:'\w*'))`
+	listOfSingles = `^(?:(?:`+ singleItem + `)\s*,\s*)*$`
+	pairItem = `\(\s*`+ singleItem  + `\s*,\s*`+ singleItem +  `\)`
+	listOfPairs = `^(?:(?:`+ pairItem + `)\s*,\s*)*$`
+)
+
 // RedisDBInterface - interface that is implemented by redis.Client,
 // and the RedisMockClient
 type RedisDBClientInterface interface {
@@ -20,30 +27,97 @@ type RedisDBClientInterface interface {
 }
 
 
-// Create database function, given the client, function name, and the argument string
-func NewRedisDatabaseFunction(
-	client RedisDBClientInterface,
-	fname string,
-	args string,
-) (db.DatabaseFunction, error) {
+type RedisDatabase struct {
+	Client RedisDBClientInterface
+}
 
-	if fname == "GET" {
-		return nil, nil
+func NewRedisDatabase(
+	isMock bool,
+	url    string,
+	pswd   string,
+) *RedisDatabase {
+	var cli RedisDBClientInterface
+	if isMock {
+		cli = NewMockRedisClient(map[string]string{})
 	} else {
-		return nil, errors.New("Error: " + fname + " is not a Redis function")
+		cli = redis.NewClient(&redis.Options{
+			Addr:     url,
+			Password: pswd, // no password set
+			DB:       0,  // use default DB
+		})
+	}
+	return &RedisDatabase {
+		Client: cli,
 	}
 }
 
 
-// Create Get Request
-func CreateGet(client RedisDBClientInterface, args string) (db.DatabaseFunction, error){
-	single := `(\w+|(?:'\w*'))`
-	isGet := re.MustCompile(`^(?:(?:`+ single + `)\s*,\s*)*$`)
-	if isGet.MatchString(args) {
-		singleRe := re.MustCompile(single)
-		matches := singleRe.FindAllString(args, -1)
 
-		return func(group environment.EnvironmentGroup) (interface{}, error){
+func (rd * RedisDatabase) IsCorrectSyntax(fname string, args string) bool {
+	if fname == "GET" {
+		_, err := NewGetFunction(rd.Client, args)
+		if err != nil {
+			return false
+		}
+		return true
+	} else if fname == "SET" {
+		_, err := NewSetFunction(rd.Client, args)
+		if err != nil {
+			return false
+		}
+		return true
+	} else if fname == "DEL" {
+		_, err := NewDeleteFunction(rd.Client, args)
+		if err != nil {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
+
+func (rd * RedisDatabase) Run(
+	fname string,
+	args string,
+	group environment.EnvironmentGroup,
+) (map[string]interface{}, error) {
+	// TODO: Refactor this
+
+	if fname == "GET" {
+		f, err := NewGetFunction(rd.Client, args)
+		if err != nil {
+			return nil, err
+		}
+		return f(group)
+	} else if fname == "SET" {
+		f, err := NewSetFunction(rd.Client, args)
+		if err != nil {
+			return nil, err
+		}
+		return f(group)
+	} else if fname == "DEL" {
+		f, err := NewDeleteFunction(rd.Client, args)
+		if err != nil {
+			return nil, err
+		}
+		return f(group)
+	}
+	return nil, errors.New("Function " + fname + "not recognized")
+}
+
+
+
+// Create Get Request
+func NewGetFunction(
+	client RedisDBClientInterface,
+	args string,
+)(db.DatabaseFunction, error){
+	isGet := re.MustCompile(listOfSingles)
+	if isGet.MatchString(args) {
+		singleRe := re.MustCompile(singleItem)
+		matches := singleRe.FindAllString(args, -1)
+		return func(group environment.EnvironmentGroup) (map[string]interface{}, error){
 			return Get(matches, client, group), nil
 		}, nil
 	}
@@ -56,8 +130,8 @@ func CreateGet(client RedisDBClientInterface, args string) (db.DatabaseFunction,
 func Get(keys []string,
 	db RedisDBClientInterface,
 	group environment.EnvironmentGroup,
-) map[string]string {
-	respData := make(map[string]string)
+) map[string]interface{} {
+	respData := make(map[string]interface{})
 	// extract a value for each key, add it to respData
 	for _, k := range keys {
 		kval := extract(k, group)
@@ -70,28 +144,80 @@ func Get(keys []string,
 
 }
 
+
+// Create Set Request
+func NewSetFunction(
+	client RedisDBClientInterface,
+	args string,
+)(db.DatabaseFunction, error){
+
+	isSet := re.MustCompile(listOfPairs)
+	if isSet.MatchString(args) {
+		pairRe := re.MustCompile(pairItem)
+		matches := pairRe.FindAllString(args, -1)
+		pairs := make([]utils.Pair, len(matches))
+
+		singleRe := re.MustCompile(singleItem)
+		for i, m := range matches {
+			items := singleRe.FindAllString(m, -1)
+			pairs[i] = utils.Pair{
+				Fst: items[0],
+				Snd: items[1],
+			}
+		}
+		return func(group environment.EnvironmentGroup) (map[string]interface{}, error){
+			return nil, Set(pairs, client, group)
+		}, nil
+	}
+
+	return nil, errors.New("Invalid argument format for GET: " + args)
+
+}
+
+
 // Set - Perform set on redis database given a list of pairs
-func Set(items []utils.Pair, db RedisDBClientInterface) bool {
+func Set(items []utils.Pair, db RedisDBClientInterface, group environment.EnvironmentGroup) error {
 	for _, kv := range items {
-		_, err := db.Set(kv.Fst.(string), kv.Snd,0).Result()
+		fst := extract(kv.Fst.(string), group)
+		snd := extract(kv.Snd.(string), group)
+		_, err := db.Set(fst, snd,0).Result()
 		if err != nil {
-			return false
+			return err
 		}
 	}
-	return true
+	return nil
 }
 
 
-func Delete(keys []string, db RedisDBClientInterface) bool {
-	_, err := db.Del(keys...).Result()
-	if err != nil {
-		return false
+// Create Delete Request
+func NewDeleteFunction(
+	client RedisDBClientInterface,
+	args string,
+)(db.DatabaseFunction, error){
+	isGet := re.MustCompile(listOfSingles)
+	if isGet.MatchString(args) {
+		singleRe := re.MustCompile(singleItem)
+		matches := singleRe.FindAllString(args, -1)
+		return func(group environment.EnvironmentGroup) (map[string]interface{}, error){
+			return nil, Delete(matches, client, group)
+		}, nil
 	}
-	return true
+	return nil, errors.New("Invalid argument format for GET: " + args)
 
 }
 
+func Delete(keys []string, db RedisDBClientInterface, group environment.EnvironmentGroup) error {
+	kvals := make([]string, len(keys))
+	for i, k := range keys {
+		kvals[i] = extract(k, group)
+	}
 
+	_, err := db.Del(kvals...).Result()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func extract(key string, group environment.EnvironmentGroup) string {
 	strRE := re.MustCompile(`^'(\w*)'$`)

@@ -11,12 +11,12 @@ import (
 type Resp struct {
 	RespType string // FILE or JSON or STR or DB
 	Body     interface{}
-	DBReq    db.Req
+	DBReq    db.DatabaseAction
 }
 
 // createResp - parse a Resp struct from the string input,
 //              return error if string can't be parsed
-func createResp(respStr string) (Resp, error) {
+func createResp(respStr string, databases map[string]db.Database) (Resp, error) {
 	isString := re.MustCompile(`^s'(.*)'$`)
 	if isString.MatchString(respStr) {
 		matches := isString.FindStringSubmatch(respStr)
@@ -35,11 +35,11 @@ func createResp(respStr string) (Resp, error) {
 		}, nil
 	}
 
-	isDB := createRespForDB(respStr)
+	isDB := createDBCall(respStr, databases)
 	if isDB != nil {
 		return Resp{
 			RespType: "DB",
-			DBReq: 	  isDB,
+			DBReq: 	  *isDB,
 		}, nil
 	}
 

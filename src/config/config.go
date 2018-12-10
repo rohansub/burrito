@@ -2,19 +2,29 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/rcsubra2/burrito/src/db"
 	"io/ioutil"
 	"os"
+
+	redis "github.com/rcsubra2/burrito/src/redis"
 )
 
+type ServerMeta struct {
+	Url 	string `json:"url"`
+	Password string `json:"password"`
+}
+
+
 type DbMeta struct {
-	name string
-	dbType string
+	DbType string     `json:"type"`
+	IsMock bool       `json:"is_mock"`
+	Server ServerMeta `json:"server"`
 }
 
 // Config - data structure to represent all configuration data
 type Config struct {
-	name string
-	Dbs  map[string]DbMeta
+	Name string `json:"name"`
+	Databases map[string]DbMeta `json:"databases"`
 }
 
 func NewConfigFromFile(filename string) (*Config, error) {
@@ -26,10 +36,21 @@ func NewConfigFromFile(filename string) (*Config, error) {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 
 	var config Config
-	json.Unmarshal(byteValue, &config)
+	err = json.Unmarshal(byteValue, &config)
+	return &config, err
+}
 
-	return &config, nil
-
+func (c * Config) CreateDatabaseClients() map[string]db.Database{
+	dbmap := make(map[string]db.Database)
+	for name, meta := range c.Databases {
+		if meta.DbType == "Redis" {
+			dbmap[name] = redis.NewRedisDatabase(
+				meta.IsMock, meta.Server.Url, meta.Server.Password)
+		} else {
+			dbmap[name] = nil
+		}
+	}
+	return dbmap
 }
 
 

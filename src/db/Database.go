@@ -1,26 +1,20 @@
 package db
 
 import (
-	"github.com/go-redis/redis"
 	"github.com/rcsubra2/burrito/src/environment"
-	"github.com/rcsubra2/burrito/src/utils"
-	"time"
 )
 
-type DatabaseFunction func(group environment.EnvironmentGroup) (interface{}, error)
+type DatabaseFunction func(group environment.EnvironmentGroup) (map[string]interface{}, error)
 
-
-// DatabaseInterface - The interface for database clients
-type DatabaseInterface interface {
-	Get(args []string) map[string]string
-	Set(items []utils.Pair) bool
-	Delete(args []string) bool
+type DatabaseAction struct {
+	Name string
+	Fname string
+	Args string
 }
 
-// RedisDBInterface - interface that is implemented by redis.Client,
-// and the RedisMockClient
-type RedisDBInterface interface {
-	Get(key string) *redis.StringCmd
-	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
-	Del(keys ...string) *redis.IntCmd
+
+type Database interface {
+	IsCorrectSyntax(fname string, args string) bool
+	Run(fname string, args string, group environment.EnvironmentGroup) (map[string]interface{}, error)
 }
+
