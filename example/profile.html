@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fakebook Profile</title>
+</head>
+<body>
+    <h1> {{ .Url.name }}</h1>
+            {{$name := .Url.name}}
+    {{range .Data}}
+        <img src="{{.}}">
+    {{end}}
+
+</html>

@@ -1,0 +1,5 @@
+() => 'index.html';
+
+('/', 'POST') => rds.SET((name, url),) => 'index.html';
+
+('/profile/:name') => rds.GET(name,) => 'profile.html';
