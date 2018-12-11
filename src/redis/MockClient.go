@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Client - MockClient datastructure for Redis
 type Client struct {
 	data map[string]string
 }

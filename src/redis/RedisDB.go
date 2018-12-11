@@ -206,6 +206,7 @@ func NewDeleteFunction(
 
 }
 
+// Delete - perform delete request on redis given a list of keys
 func Delete(keys []string, db RedisDBClientInterface, group environment.EnvironmentGroup) error {
 	kvals := make([]string, len(keys))
 	for i, k := range keys {
