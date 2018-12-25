@@ -3,7 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
-	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rohansub/burrito/src/db"
 	"io/ioutil"
 	str "strings"
 )

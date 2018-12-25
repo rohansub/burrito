@@ -3,9 +3,9 @@ package redis
 import (
 	"github.com/go-redis/redis"
 	"github.com/pkg/errors"
-	"github.com/rcsubra2/burrito/src/db"
-	"github.com/rcsubra2/burrito/src/environment"
-	"github.com/rcsubra2/burrito/src/utils"
+	"github.com/rohansub/burrito/src/db"
+	"github.com/rohansub/burrito/src/environment"
+	"github.com/rohansub/burrito/src/utils"
 	re "regexp"
 	"time"
 )
@@ -35,7 +35,7 @@ func NewRedisDatabase(
 	isMock bool,
 	url    string,
 	pswd   string,
-) *RedisDatabase {
+) db.Database {
 	var cli RedisDBClientInterface
 	if isMock {
 		cli = NewMockRedisClient(map[string]string{})

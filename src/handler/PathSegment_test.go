@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/rcsubra2/burrito/src/environment"
+	"github.com/rohansub/burrito/src/environment"
 	"reflect"
 	"testing"
 )

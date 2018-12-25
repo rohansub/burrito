@@ -185,7 +185,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test unrecognized function",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "Fakefunc",
@@ -196,7 +196,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test GET syntax correct",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "GET",
@@ -207,7 +207,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test GET syntax incorrect",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "GET",
@@ -218,7 +218,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test DELETE syntax correct",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "DEL",
@@ -229,7 +229,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test DEL syntax incorrect",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "DEL",
@@ -240,7 +240,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test SET syntax correct",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "SET",
@@ -251,7 +251,7 @@ func TestRedisDatabase_IsCorrectSyntax(t *testing.T) {
 		{
 			name: "Test SET syntax incorrect",
 			fields: fields{
-				client: NewRedisDatabase(true, "", "").Client,
+				client: NewRedisDatabase(true, "", "").(*RedisDatabase).Client,
 			},
 			args: args {
 				fname: "SET",

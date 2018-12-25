@@ -1,11 +1,11 @@
 package parser
 
 import (
-	db2 "github.com/rcsubra2/burrito/src/redis"
+	db2 "github.com/rohansub/burrito/src/redis"
 	"reflect"
 	"testing"
 
-	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rohansub/burrito/src/db"
 )
 
 

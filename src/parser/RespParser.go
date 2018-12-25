@@ -3,7 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"errors"
-	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rohansub/burrito/src/db"
 	re "regexp"
 )
 

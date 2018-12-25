@@ -3,14 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rohansub/burrito/src/db"
 	"html/template"
 	"log"
 	"net/http"
 
-	"github.com/rcsubra2/burrito/src/environment"
-	"github.com/rcsubra2/burrito/src/handler"
-	"github.com/rcsubra2/burrito/src/parser"
+	"github.com/rohansub/burrito/src/environment"
+	"github.com/rohansub/burrito/src/handler"
+	"github.com/rohansub/burrito/src/parser"
 )
 // BurritoServer - the webserver that serves parsed routes
 type BurritoServer struct {

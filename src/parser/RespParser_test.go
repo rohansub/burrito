@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"github.com/rcsubra2/burrito/src/db"
-	"github.com/rcsubra2/burrito/src/redis"
+	"github.com/rohansub/burrito/src/db"
+	"github.com/rohansub/burrito/src/redis"
 	"reflect"
 	"testing"
 )

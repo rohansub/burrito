@@ -2,15 +2,15 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/rcsubra2/burrito/src/redis"
+	"github.com/rohansub/burrito/src/redis"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 
-	"github.com/rcsubra2/burrito/src/db"
-	"github.com/rcsubra2/burrito/src/parser"
+	"github.com/rohansub/burrito/src/db"
+	"github.com/rohansub/burrito/src/parser"
 )
 
 func TestBurritoServer_Run(t *testing.T) {
@@ -170,7 +170,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"rds": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"zesty": "burrito",
 						})
 						return d;
@@ -210,7 +210,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"rds": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"hello": "burrito",
 						})
 						return d;
@@ -250,7 +250,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"redis": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"hello":      "burrito",
 							"quesadilla": "cheese",
 						})
@@ -292,7 +292,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"redis": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"hello":      "burrito",
 						})
 						return d;
@@ -332,7 +332,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"redis": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"hello": "burrito",
 						})
 						return d;
@@ -378,7 +378,7 @@ func TestBurritoServer_Run(t *testing.T) {
 				clis: map[string]db.Database{
 					"redis": func() db.Database {
 						d := redis.NewRedisDatabase(true, "", "")
-						d.Client = redis.NewMockRedisClient(map[string]string {
+						d.(*redis.RedisDatabase).Client = redis.NewMockRedisClient(map[string]string {
 							"hello":   "different",
 							"burrito": "notsame",
 						})

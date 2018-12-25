@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/rcsubra2/burrito/src/config"
+	"github.com/rohansub/burrito/src/config"
 	"os"
 
-	"github.com/rcsubra2/burrito/src/server"
-	"github.com/rcsubra2/burrito/src/parser"
+	"github.com/rohansub/burrito/src/server"
+	"github.com/rohansub/burrito/src/parser"
 	)
 
 func main() {

@@ -2,12 +2,19 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/rcsubra2/burrito/src/db"
+	"github.com/rohansub/burrito/src/db"
 	"io/ioutil"
 	"os"
 
-	redis "github.com/rcsubra2/burrito/src/redis"
+	redis "github.com/rohansub/burrito/src/redis"
 )
+
+
+var initializers = map[string]db.DatabaseConstructor{
+	"Redis": redis.NewRedisDatabase,
+}
+
+
 
 type ServerMeta struct {
 	Url 	string `json:"url"`
@@ -43,9 +50,8 @@ func NewConfigFromFile(filename string) (*Config, error) {
 func (c * Config) CreateDatabaseClients() map[string]db.Database{
 	dbmap := make(map[string]db.Database)
 	for name, meta := range c.Databases {
-		if meta.DbType == "Redis" {
-			dbmap[name] = redis.NewRedisDatabase(
-				meta.IsMock, meta.Server.Url, meta.Server.Password)
+		if init, ok := initializers[meta.DbType]; ok {
+			dbmap[name] = init(meta.IsMock, meta.Server.Url, meta.Server.Password)
 		} else {
 			dbmap[name] = nil
 		}
